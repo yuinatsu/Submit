@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<image width="32" height="32" name="DefeatItem" divwidth="6" divheight="10" source="./Resource/Image/bomb.png">
+	<animation name="LaundMine" loop="1">
+		<data count="0" time="0.15"/>
+		<data count="1" time="0.15"/>
+		<data count="2" time="0.15"/>
+		<data count="3" time="0.15"/>
+		<data count="4" time="0.15"/>
+	</animation>
+	<animation name="Exprotion" loop="1">
+		<data count="30" time="0.15"/>
+		<data count="31" time="0.15"/>
+		<data count="32" time="0.15"/>
+		<data count="33" time="0.15"/>
+		<data count="34" time="0.15"/>
+		<data count="36" time="0.15"/>
+	</animation>
+</image>

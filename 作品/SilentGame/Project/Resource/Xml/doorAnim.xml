@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<image width="64" height="32" name="Door" divwidth="9" divheight="1" source="./Resource/image/Door.png">
+	<animation name="Close" loop="-1">
+		<data count="0" time="0.15"/>
+		<data count="1" time="0.15"/>
+		<data count="2" time="0.15"/>
+	</animation>
+	<animation name="Open" loop="-1">
+		<data count="7" time="10"/>
+	</animation>
+	<animation name="Opening" loop="1">
+		<data count="3" time="0.15"/>
+		<data count="4" time="0.15"/>
+		<data count="3" time="0.15"/>
+		<data count="4" time="0.15"/>
+		<data count="5" time="0.3"/>
+		<data count="6" time="0.15"/>
+		<data count="7" time="0.15"/>
+	</animation>
+	<animation name="Closing" loop="1">
+		<data count="7" time="0.15"/>
+		<data count="6" time="0.15"/>
+		<data count="5" time="0.3"/>
+		<data count="4" time="0.15"/>
+		<data count="3" time="0.15"/>
+		<data count="4" time="0.15"/>
+		<data count="3" time="0.15"/>
+	</animation>
+	<animation name="Lock" loop="-1">
+		<data count="3" time="0.15"/>
+		<data count="8" time="0.15"/>
+		<data count="3" time="0.15"/>
+		<data count="8" time="0.15"/>
+	</animation>
+</image>

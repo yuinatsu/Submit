@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objectList name = "Player">
+	<actionNode name="Move">
+		<attach name="CheckKey" key="Non">
+			<attach name="SetAnime" state = "Idle"/>
+		</attach>
+		<attach name="CheckKey" key="Up">
+			<attach name="SetMoveVec" dirX = "0" dirY ="-1"/>
+		</attach>
+		<attach name="CheckKey" key="Down">
+			<attach name="SetMoveVec" dirX = "0" dirY ="1"/>
+		</attach>
+		<attach name="CheckKey" key="Left">
+			<attach name="SetMoveVec" dirX = "-1" dirY ="0"/>
+		</attach>
+		<attach name="CheckKey" key="Right">
+			<attach name="SetMoveVec" dirX = "1" dirY ="0"/>
+		</attach>
+		<attach name ="MovePos">
+			<attach name ="CorrectAnim"/>
+		</attach>
+	</actionNode>
+	<actionNode name="MoveSpeed">
+		<attach name="CheckKey" key="Walk">
+			<attach name="SpChange" effect="Non" speed="0.6"/>
+		</attach>
+		<attach name="CheckKey" key="Dash">
+			<attach name="CheckKey" key="Move">
+				<attach name="SpChange" effect="Up" speed="0.8"/>
+			</attach>
+			<attach name="CheckKey" key="NotMove">
+				<attach name="SetAnime" state = "Idle"/>
+			</attach>
+		</attach>
+		<attach name="CheckKey" key="Crouch">
+			<attach name="CheckKey" key="Move">
+				<attach name="SpChange" effect="Down" speed="0.4"/>
+			</attach>
+			<attach name="CheckKey" key="NotMove">
+				<attach name="SetAnime" state = "Idle"/>
+			</attach>
+		</attach>
+	</actionNode>
+	<actionNode name="ItemCur">
+		<attach name="CheckKey" key="ItemLeft">
+			<attach name="ItemCur" dir="Left"/>
+		</attach>
+		<attach name="CheckKey" key="ItemRight">
+			<attach name="ItemCur" dir="Right"/>
+		</attach>
+	</actionNode>
+	<actionNode name="AttackUpdate">
+		<attach name="Attack" time="1.0f"/>
+	</actionNode>
+</objectList>

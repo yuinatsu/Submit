@@ -1,0 +1,51 @@
+#pragma once
+#include "ButtonBase.h"
+#include <functional>
+
+class BaseScene;
+
+class Button :
+    public ButtonBase
+{
+	using PushFunc = std::function<void(BaseScene&)>;
+public:
+	Button(PushFunc&& pushFunc, const std::filesystem::path& btnPath, const std::filesystem::path& hitCursorPath, const Vector2& pos);
+	void Update(float delta, ObjectManager& objMng, Controller& controller);
+	void Draw();
+
+private:
+	void Push(BaseScene& scene, Controller& controller) final;
+	void HitCursor(void) final;
+	void NotHitCursor(void)final;
+
+	UiID GetUIID(void) final
+	{
+		return UiID::Button;
+	}
+	void Loaded(void) final;
+
+	/// <summary>
+	/// カーソルと当たっている時の描画
+	/// </summary>
+	/// <param name=""></param>
+	void DrawHitCursor(void);
+
+	/// <summary>
+	/// カーソルと当たってないときの描画
+	/// </summary>
+	/// <param name=""></param>
+	void DrawNotHitCursor(void);
+
+	// 描画
+	void(Button::* draw_)(void);
+
+	// ボタン
+	SharedGraphicHandle btnHandle_;
+
+	// カーソルと当たってる時
+	SharedGraphicHandle hitCursorHandle_;
+
+	// ボタンを押したときの処理
+	PushFunc pushFunc_;
+};
+

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<image width="32" height="32" name="enemy" divwidth="3" divheight="4" source="./Resource/image/enemy.png">
+	<animation name="Down" loop="-1">
+		<data count="6" time="0.15"/>
+		<data count="7" time="0.15"/>
+		<data count="8" time="0.15"/>
+	</animation>
+	<animation name="Left" loop="-1">
+		<data count="9" time="0.15"/>
+		<data count="10" time="0.15"/>
+		<data count="11" time="0.15"/>
+	</animation>
+	<animation name="Right" loop="-1">
+		<data count="3" time="0.15"/>
+		<data count="4" time="0.15"/>
+		<data count="5" time="0.15"/>
+	</animation>
+	<animation name="Up" loop="-1">
+		<data count="0" time="0.15"/>
+		<data count="1" time="0.15"/>
+		<data count="2" time="0.15"/>
+	</animation>
+	<animation name="Idle" loop="-1">
+		<data count="7" time="0.15"/>
+	</animation>
+</image>

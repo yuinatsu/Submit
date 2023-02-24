@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<char key="player">
+	<data name="kaiundaimon" limit="15">
+		<cnd key="2" time="1" flag="true"/>
+		<cnd key="3" time="20" flag="true"/>
+		<cnd key="6" time="20" flag="true"/>
+		<cnd key="SWT3" time="1" flag="true"/>
+	</data>
+</char>

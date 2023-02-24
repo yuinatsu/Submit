@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<moduleList name="Player" version ="1.0">
+<actNode name="Idle">
+<module name="Stop">
+<module name="SetAnim" id="Idle"/>
+</module>
+<module name="CheckG" isGnd="true">
+<module name="CheckAnim" flag="true" id="Fall">
+<module name="CheckAnim" flag="false" id="Run">
+<module name="SetAnim" id="Idle"/>
+</module>
+</module>
+</module>
+</actNode>
+<actNode name="MoveLR">
+<module name="CheckKey" key="LEFT">
+<module name="CheckRay" x="-120.0" offsetX="-">
+<module name="Move" x="-120.0">
+<module name="CheckAnim" flag="false" id="Fall">
+<module name="CheckAnim" flag="false" id="Jump">
+<module name="SetAnim" id="Run"/>
+</module>
+</module>
+</module>
+</module>
+</module>
+</actNode>
+<actNode name="MoveLR">
+<module name="CheckKey" key="RIGHT">
+<module name="CheckRay" x="120.0" offsetX="+">
+<module name="Move" x="120.0">
+<module name="CheckAnim" flag="false" id="Fall">
+<module name="CheckAnim" flag="false" id="Jump">
+<module name="SetAnim" id="Run"/>
+</module>
+</module>
+</module>
+</module>
+</module>
+</actNode>
+<actNode name="Jump">
+<module name="CheckG" isGnd="true">
+<module name="CheckKeyTrg" key="SWT1">
+<module name="Jump"/>
+</module>
+</module>
+</actNode>
+<actNode name="Fall">
+<module name="CheckG" isGnd="false">
+<module name="Fall"/>
+</module>
+</actNode>
+<actNode name="Attack">
+<module name="CheckG" isGnd="true">
+<module name="CheckKeyTrg" key="SWT3">
+<module name="Command">
+<module name="Attack"/>
+</module>
+</module>
+</module>
+</actNode>
+</moduleList>

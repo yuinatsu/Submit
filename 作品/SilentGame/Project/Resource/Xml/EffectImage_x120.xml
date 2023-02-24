@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<image width="120" height="120" name="Effect" divwidth="14" divheight="2" source="./Resource/image/Effect/effect_x120.png">
+	<animation name="Tornado" loop="1">
+		<data count="0" time="0.03"/>
+		<data count="1" time="0.03"/>
+		<data count="2" time="0.03"/>
+		<data count="3" time="0.03"/>
+		<data count="4" time="0.03"/>
+		<data count="5" time="0.03"/>
+		<data count="6" time="0.03"/>
+		<data count="7" time="0.03"/>
+		<data count="8" time="0.03"/>
+		<data count="9" time="0.03"/>
+		<data count="10" time="0.03"/>
+		<data count="11" time="0.03"/>
+		<data count="12" time="0.03"/>
+		<data count="13" time="0.03"/>
+	</animation>
+	<animation name="BigSlash" loop="1">
+		<data count="14" time="0.03"/>
+		<data count="15" time="0.03"/>
+		<data count="16" time="0.03"/>
+		<data count="17" time="0.03"/>
+		<data count="18" time="0.03"/>
+		<data count="19" time="0.03"/>
+		<data count="20" time="0.03"/>
+		<data count="21" time="0.03"/>
+		<data count="22" time="0.03"/>
+		<data count="23" time="0.03"/>
+		<data count="24" time="0.03"/>
+		<data count="25" time="0.03"/>
+		<data count="26" time="0.03"/>
+		<data count="27" time="0.03"/>
+	</animation>
+</image>

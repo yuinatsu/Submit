@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rootNode>
+	<SelectorNode>
+		<!-- アイテムによる妨害を受けたときの処理 -->
+		<SequenceNode>
+			<ConditionNode FuncName="EnemyCheckStateFunc" State="5"/>
+			<ActionNode FuncName="EnemyReactionAnimFunc" Name="Non"/>
+			<ActionNode FuncName="EnemyWaitStateTimeFunc" Time="3"/>
+			<ActionNode FuncName="EnemySetStateFunc" State="7"/>
+			<ActionNode FuncName="EnemyReactionAnimFunc" Name="Lost"/>
+		</SequenceNode>
+		<!-- デコイ等を破壊中の処理 -->
+		<SequenceNode>
+			<ConditionNode FuncName="EnemyCheckStateFunc" State="9"/>
+			<ActionNode FuncName="EnemyReactionAnimFunc" Name="Non"/>
+			<ActionNode FuncName="EnemyWaitStateTimeFunc" Time="0.8"/>
+			<ActionNode FuncName="EnemySetStateFunc" State="7"/>
+			<ActionNode FuncName="EnemyReactionAnimFunc" Name="Lost"/>
+		</SequenceNode>
+		<!-- 攻撃を受けた時 -->
+		<SequenceNode>
+			<ConditionNode FuncName="EnemyCheckStateFunc" State="10"/>
+			<ActionNode FuncName="RandLRPosFunc" Max="0.7"/>
+			<SequenceNode>
+				<ConditionNode FuncName="EnemyIsOverStateTimeFunc" Time="0.3"/>
+				<ActionNode FuncName="DeleteObjFunc"/>
+			</SequenceNode>
+		</SequenceNode>
+		<!-- プレイヤーか設置アイテムを視界にとらえたときの処理 -->
+		<SequenceNode>
+			<ConditionNode FuncName="EnemyCheckStateFunc" State="8"/>
+			<ActionNode FuncName="EnemyReactionAnimFunc" Name="Look"/>
+			<ActionNode FuncName="PlaySEFunc" SE="2"/>
+			<ActionNode FuncName="EnemyWaitStateTimeFunc" Time="0.25"/>
+			<ActionNode FuncName="EnemyReactionAnimFunc" Name="Non"/>
+			<ActionNode FuncName="EnemySetStateFunc" State="7"/>
+			<ConditionNode FuncName="FanColIsHitFunc"/>
+			<ActionNode FuncName="EnemySetStateFunc" State="0"/>
+		</SequenceNode>
+		<!-- 音に反応したときの処理 -->
+		<SequenceNode>
+			<ConditionNode FuncName="EnemyCheckStateFunc" State="11"/>
+			<ActionNode FuncName="EnemyReactionAnimFunc" Name="Sound"/>
+			<ActionNode FuncName="PlaySEFunc" SE="2"/>
+			<ActionNode FuncName="EnemyWaitStateTimeFunc" Time="0.25"/>
+			<ActionNode FuncName="EnemyReactionAnimFunc" Name="Non"/>
+			<ActionNode FuncName="EnemySetStateFunc" State="1"/>
+		</SequenceNode>
+		<!-- 音に反応し振り向いた時の処理 -->
+		<SequenceNode>
+			<ConditionNode FuncName="EnemyCheckStateFunc" State="1"/>
+			<ActionNode FuncName="RotaFunc"/>
+			<ActionNode FuncName="AnimCorrectMoveVecToAnim"/>
+			<ConditionNode FuncName="EnemyCheckAngleFunc"/>
+			<SelectorNode>
+				<SequenceNode>
+					<ActionNode FuncName="EnemyStartNaviTargetFunc"/>
+					<ActionNode FuncName="EnemySetStateFunc" State="2"/>
+				</SequenceNode>
+				<SequenceNode>
+					<ActionNode FuncName="EnemySetStateFunc" State="7"/>
+				</SequenceNode>
+				<ActionNode FuncName="EnemyReactionAnimFunc" Name="Lost"/>
+				<ActionNode FuncName="PlaySEFunc" SE="3"/>
+			</SelectorNode>
+		</SequenceNode>
+		<!-- 追跡するときの処理 -->
+		<SequenceNode>
+			<ConditionNode FuncName="EnemyCheckStateFunc" State="0"/>
+			<SelectorNode>
+				<SequenceNode>
+					<ConditionNode FuncName="FanColIsHitFunc"/>
+					<ConditionNode FuncName="IsMoveFunc"/>
+					<ActionNode FuncName="EnemyTraceFunc"/>
+					<ActionNode FuncName="MoveFunc"/>
+					<ActionNode FuncName="AnimCorrectMoveVecToAnim"/>
+				</SequenceNode>
+				<SequenceNode>
+					<ActionNode FuncName="EnemySetStateFunc" State="7"/>
+					<ActionNode FuncName="EnemyReactionAnimFunc" Name="Lost"/>
+					<ActionNode FuncName="PlaySEFunc" SE="3"/>
+				</SequenceNode>
+			</SelectorNode>
+		</SequenceNode>
+		<!-- ギミックによって特定も場所に移動する処理 -->
+		<SequenceNode>
+			<ConditionNode FuncName="EnemyCheckStateFunc" State="2"/>
+			<ActionNode FuncName="PatrolNaviStopFunc"/>
+			<ActionNode FuncName="NaviWaitSearchFunc"/>
+			<SelectorNode>
+				<SequenceNode>
+					<ConditionNode FuncName="NaviStateCheckFindFunc"/>
+					<ActionNode FuncName="NaviMoveFunc"/>
+					<ActionNode FuncName="AnimCorrectMoveVecToAnim"/>
+				</SequenceNode>
+				<SequenceNode>
+					<ConditionNode FuncName="NaviCheckDestFunc"/>
+					<ActionNode FuncName="EnemySetStateFunc" State="7"/>
+					<ActionNode FuncName="EnemyReactionAnimFunc" Name="Lost"/>
+					<ActionNode FuncName="PlaySEFunc" SE="3"/>
+				</SequenceNode>
+			</SelectorNode>
+		</SequenceNode>
+		<!-- 巡回地点に戻るための処理 -->
+		<SequenceNode>
+			<ConditionNode FuncName="EnemyCheckStateFunc" State="4"/>
+			<ActionNode FuncName="NaviWaitSearchFunc"/>
+			<SelectorNode>
+				<SequenceNode>
+					<ConditionNode FuncName="NaviStateCheckFindFunc"/>
+					<ActionNode FuncName="NaviMoveFunc"/>
+					<ActionNode FuncName="AnimCorrectMoveVecToAnim"/>
+				</SequenceNode>
+				<SequenceNode>
+					<ConditionNode FuncName="NaviCheckDestFunc"/>
+					<ActionNode FuncName="PatrolNaviStartFunc"/>
+					<ActionNode FuncName="EnemySetStateFunc" State="3"/>
+				</SequenceNode>
+			</SelectorNode>
+		</SequenceNode>
+		<!-- 何もないときの処理 -->
+		<SequenceNode>
+			<ConditionNode FuncName="EnemyCheckStateFunc" State="6"/>
+			<ActionNode FuncName="NaviSetRoutePatrolFunc"/>
+			<ActionNode FuncName="EnemySetStateFunc" State="4"/>
+			<ActionNode FuncName="PatrolNaviStopFunc"/>
+		</SequenceNode>
+		<!-- 見失った時の処理 -->
+		<SequenceNode>
+			<ConditionNode FuncName="EnemyCheckStateFunc" State="7"/>
+			<SequenceNode>
+				<SelectorNode>
+					<SequenceNode>
+						<ConditionNode FuncName="EnemyIsOverStateTimeFunc" Time="2"/>
+						<ActionNode FuncName="EnemySetStateFunc" State="6"/>
+						<ActionNode FuncName="EnemyReactionAnimFunc" Name="Non"/>
+					</SequenceNode>
+					<SelectorNode>
+						<SequenceNode>
+							<ConditionNode FuncName="EnemyCheckAngleFunc"/>
+							<ActionNode FuncName="EnemyRandRotaFunc"/>
+						</SequenceNode>
+						<SequenceNode>
+							<ActionNode FuncName="RotaFunc"/>
+							<ActionNode FuncName="AnimCorrectMoveVecToAnim"/>
+						</SequenceNode>
+					</SelectorNode>
+				</SelectorNode>
+			</SequenceNode>
+		</SequenceNode>
+		<!-- 巡回する処理 -->
+		<SequenceNode>
+			<ConditionNode FuncName="PatrolCheckNotIsStop"/>
+			<ActionNode FuncName="PatrolMoveFunc"/>
+			<ActionNode FuncName="AnimCorrectMoveVecToAnim"/>
+		</SequenceNode>
+	</SelectorNode>
+</rootNode>

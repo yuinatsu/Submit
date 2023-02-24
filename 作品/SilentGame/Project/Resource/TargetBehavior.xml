@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rootNode>
+	<SelectorNode>
+		<!-- 巡回する処理 -->
+		<SequenceNode>
+			<ConditionNode FuncName="PatrolCheckNotIsStop"/>
+			<ActionNode FuncName="PatrolMoveFunc"/>
+			<ActionNode FuncName="AnimCorrectMoveVecToAnim"/>
+		</SequenceNode>
+	</SelectorNode>
+</rootNode>
