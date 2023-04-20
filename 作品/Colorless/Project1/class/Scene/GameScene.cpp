@@ -125,17 +125,8 @@ uniqueBaseScene GameScene::Update(double delta, uniqueBaseScene own)
 
 	if (count_ >= 1.5 && playerFlag_ == true)
 	{
-		// コントローラー情報
-		//if (GetJoypadNum())
-		//{
-		//	objList_.emplace_back(std::make_unique<Player>(CntType::Pad, tmxObj_, Vector2F(32, 608)));
-		//	lpSceneMng.SetCntType(CntType::Pad);
-		//}
-		//else
-		//{
-			objList_.emplace_back(std::make_unique<Player>(CntType::Key, tmxObj_, Vector2F(32, 608)));
-			lpSceneMng.SetCntType(CntType::Key);
-		//}
+		objList_.emplace_back(std::make_unique<Player>(CntType::Key, tmxObj_, Vector2F(32, 608)));
+		lpSceneMng.SetCntType(CntType::Key);
 		playerFlag_ = false;
 	}
 

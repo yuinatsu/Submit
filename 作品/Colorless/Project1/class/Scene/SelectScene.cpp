@@ -22,7 +22,6 @@ bool SelectScene::Init(void)
 {
 	tmxObj_ = std::make_shared<TmxObj>();
 	// ステージ情報
-	//tmxObj_->LoadTmx("Tiled/select.tmx");
 	tmxObj_->LoadTmx("Tiled/selectMap.tmx");
 	selectBGM_ = LoadSoundMem(SH_BGM_SELECT);
 	selectSE_ = LoadSoundMem(SH_SE_SELECT);
@@ -57,17 +56,8 @@ uniqueBaseScene SelectScene::Update(double delta, uniqueBaseScene own)
 
 	if (count_ >= 2.8 && playerFlag_ == true)
 	{
-		// コントローラー情報
-		//if (GetJoypadNum())
-		//{
-		//	obj_.emplace_back(std::make_unique<Player>(CntType::Pad, tmxObj_, Vector2F(32, 608)));
-		//	lpSceneMng.SetCntType(CntType::Pad);
-		//}
-		//else
-		//{
-			obj_.emplace_back(std::make_unique<Player>(CntType::Key, tmxObj_, Vector2F(32, 608)));
-			lpSceneMng.SetCntType(CntType::Key);
-		//}
+		obj_.emplace_back(std::make_unique<Player>(CntType::Key, tmxObj_, Vector2F(32, 608)));
+		lpSceneMng.SetCntType(CntType::Key);
 		playerFlag_ = false;
 	}
 
@@ -106,16 +96,6 @@ uniqueBaseScene SelectScene::Update(double delta, uniqueBaseScene own)
 		StopSoundMem(selectBGM_);
 		return std::make_unique<CrossOver>(std::move(own), std::make_unique<GameScene>());
 	}
-	//if ((lpSceneMng.keyBuf_[KEY_INPUT_X] && !lpSceneMng.keyBufOld_[KEY_INPUT_X]))
-	//{
-	//	tmxObj_->ClearMapData();
-	//	tmxObj_->LoadTmx("Tiled/select.tmx");
-	//}
-	//if ((lpSceneMng.keyBuf_[KEY_INPUT_Z] && !lpSceneMng.keyBufOld_[KEY_INPUT_Z]))
-	//{
-	//	tmxObj_->ClearMapData();
-	//	tmxObj_->LoadTmx("Tiled/selectMap.tmx");
-	//}
 	DrawOwnScreen(delta);
 	return std::move(own);
 }

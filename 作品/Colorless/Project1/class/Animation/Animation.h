@@ -28,9 +28,9 @@ public:
 	std::string GetKey(void);									// キー情報取得
 	std::string GetState(void);									// ステータス取得
 private:
-	std::string key_;
-	std::string state_;
-	int animFrame_;
-	int animCount_;
+	std::string key_;											// キー
+	std::string state_;											// 状態
+	int animFrame_;												// アニメーションフレーム
+	int animCount_;												// アニメーションカウンタ
 };
 

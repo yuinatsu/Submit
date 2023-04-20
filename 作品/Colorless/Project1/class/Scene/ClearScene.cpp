@@ -34,12 +34,6 @@ bool ClearScene::Init(void)
 
 uniqueBaseScene ClearScene::Update(double delta, uniqueBaseScene own)
 {
-	//if ((lpSceneMng.keyBuf_[KEY_INPUT_Z] && !lpSceneMng.keyBufOld_[KEY_INPUT_Z]))
-	//{
-	//	PlaySoundMem(clearSE_, DX_PLAYTYPE_BACK);
-	//	return std::make_unique<CrossOver>(std::move(own), std::make_unique<SelectScene>());
-	//}
-
 	if (cursorNum_ <= 0 && (lpSceneMng.keyBuf_[KEY_INPUT_UP] && !lpSceneMng.keyBufOld_[KEY_INPUT_UP]))
 	{
 		cursorPos_.y -= 120;

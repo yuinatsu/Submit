@@ -1,9 +1,5 @@
 #pragma once
 #include "Vector2.h"
-//--------------------------------------------------------------------------
-// FileSize：画像ファイル等のサイズ等を格納
-//--------------------------------------------------------------------------
-
 #define lpSize FileSize::GetInstance()
 
 class FileSize
@@ -15,7 +11,7 @@ public:
 		return s_Instance;
 	}
 
-	//【画像ファイル】
+
 	const Vector2 blockImageSize_{ 288,32 };//ブロック全体
 	const Vector2 blockSize_{ 32,32 };//ブロック単体
 	const Vector2 blockDiv_{ 9, 1 };//ブロック分割数

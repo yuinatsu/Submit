@@ -20,7 +20,7 @@ public:
 		}
 	};
 
-	bool CheckCollision(Ray ray,CollisionColor col);
-	bool CheckRay(Ray ray,Line line);
+	bool CheckCollision(Ray ray,CollisionColor col);			// ƒRƒŠƒWƒ‡ƒ“
+	bool CheckRay(Ray ray,Line line);							// ƒŒƒC
 };
 
