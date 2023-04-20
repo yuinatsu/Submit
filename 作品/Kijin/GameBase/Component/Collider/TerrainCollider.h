@@ -2,6 +2,7 @@
 #include "Collider.h"
 #include "../Render/ModelRender.h"
 
+// 地形や建物用当たり判定クラス
 class TerrainCollider :
     public Collider
 {
@@ -23,12 +24,10 @@ public:
 	/// <param name=""></param>
 	/// <returns> ハンドル </returns>
 	const int GetHandle(void) const;
-	const int GetGroundHandle(void) const
-	{
-		return *ground_;
-	}
+
+	// 当たり判定用モデルをロードする
 	void Load(const std::filesystem::path& path);
-	void LoadGround(const std::filesystem::path& path);
+
 #ifdef _DEBUG
 	void DrawDebug(void) final;
 #endif
@@ -40,11 +39,8 @@ private:
 	bool Check(CharactorCollider& col, ObjectManager& objectManager) final;
 	bool Check(TerrainCollider& col, ObjectManager& objectManager) final;
 
-	// 当たり判定用モデルを表示するクラス(モデルハンドルを持っているので)
-	ComponentHandle<ModelRender> render_;
-
-
+	// 判定用モデルのハンドル
 	SharedModelHandle handel_;
-	SharedModelHandle ground_;
+
 };
 

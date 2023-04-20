@@ -1,7 +1,10 @@
 #pragma once
 #include <DxLib.h>
 #include "Vector3.h"
-#include "../Application.h"
+#include "ScreenID.h"
+#include "../SceneManager.h"
+#include "Quaternion.h"
+
 class ObjectManager;
 class Controller;
 
@@ -9,34 +12,12 @@ class Controller;
 class Camera
 {
 public:
-	Camera();
-
-	// ここから試し用のカメラ---------------------------------------------------
-	static constexpr float HEGHT = 200.0f;
-	// 注視点からカメラまでのXZ距離
-	static constexpr float TARGET_TO_CAMERA = 500.0f;
-	// 注視点からキャラクタまでのXZ距離
-	static constexpr float TARGET_TO_CHAR = 300.0f;
-	// 画面の中心 (1280,720)
-	static constexpr int HALF_SIZE_X = 640;
-	static constexpr int HALF_SIZE_Y = 360;
-
-	// カメラの移動制御と注視点の設定
-	void Update(Controller& controller);
-
-	Vector3 GetAngle(void);
 
 	/// <summary>
-	/// カメラのセットアップをする
+	/// 描画ようにカメラのセットアップをする
 	/// </summary>
 	/// <param name=""></param>
 	void SetUpScreen(void) const;
-
-	/// <summary>
-	/// カメラを指定座標の方へ向ける
-	/// </summary>
-	/// <param name="pos"> 向けたい座標 </param>
-	void Look(const Vector3& pos);
 
 	/// <summary>
 	/// カメラの上方向を取得する
@@ -52,40 +33,37 @@ public:
 	/// <returns></returns>
 	const Vector3 GetForward(void) const;
 
+
+	/// <summary>
+	/// カメラの座標をセットする
+	/// </summary>
+	/// <param name="pos"></param>
 	void SetPos(const Vector3& pos)
 	{
-		pPos_ = pos;
+		pos_ = pos;
 	}
+
+	/// <summary>
+	/// シャドウマップ描画用にカメラをセットする
+	/// </summary>
+	/// <param name="size"></param>
+	/// <param name="n"> near </param>
+	/// <param name="f"> fur </param>
+	/// <param name="target"> 中視点 </param>
+	void SetUpShadow(float size, float n, float f, const Vector3& target) const;
+
+	/// <summary>
+	/// 回転をクォータニオンでセットする
+	/// </summary>
+	/// <param name="q"></param>
+	void SetRotation(const Quaternion& q);
 private:
-	// カメラの移動制御の計算
-	void rotate(float* posX,float* posY, const float angle, const Vector3 mpos);
-
-	// カメラの移動制御
-	void ControlCamera(Controller& controller);
-	// カメラの注視点の設定
-	void SetBefore(void);
-
-	// 確認用のアングル
-	Vector3 angle_;
-
-	// 同期先の座標
-	Vector3 pPos_;
-
-	// 傾き
-	MATRIX rotation_;
 
 	// カメラの座標
 	Vector3 pos_;
 
-	// 注視点
-	Vector3 target_;
-	VECTOR vtarget_;
+	// カメラの回転
+	Quaternion qRot_;
 
-	Vector2 speed_;
-
-	// カメラのヨーイング
-	float yaw;
-	// マウスの座標をセット
-	Vector2I mousePos_;
 };
 

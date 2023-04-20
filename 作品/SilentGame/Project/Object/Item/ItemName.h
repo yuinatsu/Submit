@@ -1,6 +1,6 @@
 #pragma once
 
-/// <summary> アイテムの種類 </summary>
+// アイテムの種類 
 enum class ItemName
 {
     Knife,          // ナイフ

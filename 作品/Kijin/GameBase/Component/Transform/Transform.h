@@ -3,6 +3,7 @@
 #include <DxLib.h>
 #include <fstream>
 #include "../../Common/Math.h"
+#include "../../Common/Quaternion.h"
 #include "../ComponentBase.h"
 
 
@@ -13,40 +14,10 @@ class Transform :
 {
 public:
 	Transform();
-
-	/// <summary>
-	/// 子オブジェクトのIDを追加
-	/// </summary>
-	/// <param name="id"> 子オブジェクト </param>
-	void AddChild(const ObjectID& id);
-
-	/// <summary>
-	/// 子オブジェクトのIDの削除
-	/// </summary>
-	/// <param name="id"></param>
-	void RemoveChild(const ObjectID& id);
 	
-	/// <summary>
-	/// 親オブジェクトのIDをセット
-	/// </summary>
-	/// <param name="id"></param>
-	void SetParent(const ObjectID& id)
-	{
-		parent_ = id;
-	}
-
-	/// <summary>
-	/// 親オブジェクトのIDの取得
-	/// </summary>
-	/// <param name=""></param>
-	/// <returns></returns>
-	const ObjectID& GetParentID(void) const&
-	{
-		return parent_;
-	}
-
 	void Update(BaseScene& scene, ObjectManager& objectManager, float delta, Controller& controller) final;
-	void Sync(Transform& parent);
+
+
 	void End(ObjectManager& objectManager) final;
 
 	/// <summary>
@@ -71,88 +42,68 @@ public:
 	/// <returns></returns>
 	const Vector3 GetRight(void) const;
 
-	
 	/// <summary>
-	/// トランスフォームを指定ベクトルへ傾ける
+	/// 回転を追加する(クォータニオン)
 	/// </summary>
-	/// <param name="vec"> 傾ける方向のベクトル </param>
-	void LookAt(const Vector3& vec);
-
-
-	/// <summary>
-	/// x,y,zで回転をセットする
-	/// </summary>
-	/// <param name="eulerRot"></param>
-	void SetRotFromEulerRot(const Vector3& eulerRot);
-
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <param name="eulerRot"></param>
-	void AddRotFromEulerRot(const Vector3& eulerRot);
-
-	/// <summary>
-	/// 回転を行列をセットする
-	/// </summary>
-	/// <param name="matrix"> 行列 </param>
-	void SetRotationMatrix(const MATRIX& matrix)
+	/// <param name="addRotation"> 追加する回転(クォータニオン) </param>
+	/// <returns></returns>
+	void AddRotation(const Quaternion& addRotation) &
 	{
-		rot_ = matrix;
-	}
-
-	MATRIX& Rot(void)&
-	{
-		return rot_;
+		rot_ *= addRotation;
 	}
 
 	/// <summary>
-	/// 回転を追加する
+	/// 回転をセットする(クォータニオン)
 	/// </summary>
-	/// <param name="matrix"></param>
-	void AddRotationMatrix(const MATRIX& matrix);
-
-	/// <summary>
-	/// ローカル回転をx,y,zでセットする
-	/// </summary>
-	/// <param name="eulerRot"></param>
-	void SetLocalRotFromEulerRot(const Vector3& eulerRot);
-
-	/// <summary>
-	/// ローカル回転をx,y,zで追加する
-	/// </summary>
-	/// <param name="eulerRot"></param>
-	void AddLocalRotFromEulerRot(const Vector3& eulerRot);
-
-	void SetLocalRotaionMatrix(const MATRIX& matrix)
+	/// <param name="rotation"></param>
+	void SetRotation(const Quaternion& rotation) &
 	{
-		localRot_ = matrix;
+		rot_ = rotation;
 	}
 
 	/// <summary>
-	/// 回転情報の行列を取得
+	/// 回転の取得
 	/// </summary>
 	/// <param name=""></param>
-	/// <returns> 回転の行列 </returns>
-	MATRIX GetRotationMatrix(void) const&
-	{
-		return MMult(MMult(localRot_,parentRot_), rot_);
-	}
+	/// <returns></returns>
+	const Quaternion GetRotation(void) const;
 
+
+	/// <summary>
+	/// 座標の取得
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
 	const Vector3& GetPos(void) const&
 	{
 		return pos_;
 	}
 
+	/// <summary>
+	/// 座標の参照の取得
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
 	Vector3& Pos(void)&
 	{
 		return pos_;
 	}
 
+	/// <summary>
+	/// スケーリングの取得
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
 	const Vector3& GetScale(void) const&
 	{
 		return scale_;
 	}
 	
+	/// <summary>
+	/// スケーリングの参照の取得
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
 	Vector3& Scale(void)&
 	{
 		return scale_;
@@ -182,19 +133,7 @@ public:
 	}
 private:
 
-	// 子オブジェクトのリスト
-	std::list<ObjectID> children_;
-
-	// 親オブジェクト
-	ObjectID parent_;
-	// 行列
-	MATRIX rot_;
-
-	// local座標
-	MATRIX localRot_;
-
-	// 親の回転
-	MATRIX parentRot_;
+	Quaternion rot_;
 
 	// 座標
 	Vector3 pos_;

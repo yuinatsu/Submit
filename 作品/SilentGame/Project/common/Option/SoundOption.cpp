@@ -87,7 +87,6 @@ void SoundOption::DrawSoundSet(void)
 	// まれにtが10になるので応急処置でクランプしてます
 	int t1 = std::clamp(static_cast<int>(bgVal / 10), 0, 9);
 	int t2 = std::clamp(static_cast<int>(bgVal - (t1 * 10)), 0, 9);
-	//int tmp = (bgVal / 10) % 10;
 	if (VolumeType_ == 1)
 	{
 		SetDrawBright(255, 0, 0);
@@ -120,14 +119,12 @@ bool SoundOption::UpdateSEset(float delta)
 	if (controller_.Pressed(InputID::Left))
 	{
 		SoundProcess::PlayBackSound(SoundProcess::SOUNDNAME_SE::select, SoundProcess::GetSEVolumeEntire(), false);
-		//val -= 0.09f;
 		val -= 0.1f;
 		val = (val * 100 + 1) / 100;
 	}
 	if (controller_.Pressed(InputID::Right))
 	{
 		SoundProcess::PlayBackSound(SoundProcess::SOUNDNAME_SE::select, SoundProcess::GetSEVolumeEntire(), false);
-		//val += 0.09f;
 		val += 0.1f;
 		val = (val * 100 + 1) / 100;
 	}
@@ -170,7 +167,6 @@ void SoundOption::DrawSet(void)
 			tmpKeyStr = "PadXbox";
 		}
 		auto& paddata = lpImageMng.GetID(tmpKeyStr);
-		//DrawFormatString(775, 425, 0xffffff, "戻る：");
 		DrawGraph(775, 425, lpImageMng.GetID("./Resource/Image/Option/decision.png")[0], true);
 		DrawGraph(850, 425, paddata[lpConfigMng.GetJoypadInputCode().at(InputID::Attack)], true);
 	}
@@ -182,14 +178,12 @@ bool SoundOption::UpdateBGset(float delta)
 	if (controller_.Pressed(InputID::Left))
 	{
 		SoundProcess::PlayBackSound(SoundProcess::SOUNDNAME_SE::select, SoundProcess::GetSEVolumeEntire(), false);
-		//val -= 0.09f;
 		val -= 0.1f;
 		val = (val * 100 + 1) / 100;
 	}
 	if (controller_.Pressed(InputID::Right))
 	{
 		SoundProcess::PlayBackSound(SoundProcess::SOUNDNAME_SE::select, SoundProcess::GetSEVolumeEntire(), false);
-		//val += 0.09f;
 		val += 0.1f;
 		val = (val * 100 + 1) / 100;
 	}

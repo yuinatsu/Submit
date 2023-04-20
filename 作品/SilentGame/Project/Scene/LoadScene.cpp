@@ -64,14 +64,6 @@ uniqueScene LoadScene::Update(float delta, uniqueScene ownScene)
 			}
 		}
 	}
-	//else if (after_->GetSceneID() == Scene::Clear)
-	//{
-	//	if (count > limitTime_ && GetASyncLoadNum() <= 0)
-	//	{
-	//		after_->Loaded();
-	//		return std::make_unique<ClearScene>();
-	//	}
-	//}
 	// それ以外のシーンはフェード
 	else
 	{

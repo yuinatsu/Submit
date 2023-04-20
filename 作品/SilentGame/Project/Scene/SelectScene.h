@@ -32,7 +32,6 @@ enum class SELECT_TYPE
     StageThirteen,
     StageFourteen,
     StageFifteen,
-    //Title,
     Max,
 };
 

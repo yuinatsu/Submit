@@ -44,7 +44,6 @@ inline std::unique_ptr<T> ComponentPool::Pop(void)
 	else
 	{
 		// ñ≥Ç©Ç¡ÇΩÇÁê∂ê¨Ç∑ÇÈ
-		DebugLog("make");
 		return std::move(std::make_unique<T>());
 	}
 }

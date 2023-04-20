@@ -6,8 +6,6 @@ enum class InputID
 {
 	Jump,				// ジャンプ
 	Attack,				// 攻撃
-	btn1,				// メニューを開く
-	// 変更可能
 	Dash,				// ダッシュトリガー
 	Skil,				// スキルの使用
 	Max

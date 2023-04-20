@@ -1,30 +1,24 @@
-#include <DxLib.h>
-#include "../../Application.h"
-#include "Fade.h"
 #include "Loading.h"
-#include "../../Common/Debug.h"
+#include "../../SceneManager.h"
 #include "../../UI/UiManager.h"
 
-#include <EffekseerForDXLib.h>
 
-Loading::Loading(SceneUptr loadScene, TransitionType type, float transTime, bool isIndicator) :
-    BaseScene{ScreenID::Loading, SceneID::Loading}, type_{type}, loadScene_{std::move(loadScene)}, transTime_{transTime},
-	isIndicator_{isIndicator}
+#include "../../Common/Debug.h"
+
+Loading::Loading(SceneUptr befor, SceneUptr after, float transTime):
+	BaseScene{ ScreenID::Loading, SceneID::Loading },
+	after_{ std::move(after) }, befor_{std::move(befor)},
+	transTime_{ transTime }, stepTime_{0.0f}
 {
-	SetMakeSceneFunc(std::bind(&Loading::MakeNextFunc, this, std::placeholders::_1), SceneID::Transition);
-	uiMng_ = std::make_unique<UiManager>(SceneID::Loading);
-	uiMng_->Begin();
+	SetMakeSceneFunc(std::bind(&Loading::MakeNextFunc, this, std::placeholders::_1), after_->GetID());
+	uiMng_ = std::make_unique<UiManager>("Resource/Other/UiData/load.ui", false, false, false);
+	uiMng_->Begin(*this);
 }
 
-void Loading::Update(float delta, Controller& controller)
+Loading::~Loading()
 {
-	if (loadScene_->IsLoaded())
-	{
-		loadScene_->Loaded(controller);
-		ChangeSceneID(SceneID::Transition);
-	}
-	uiMng_->Update(delta, *this, *objMng_, controller);
 }
+
 
 void Loading::LoadingIndicator(float delta)
 {
@@ -34,23 +28,8 @@ void Loading::Relese(void)
 {
 }
 
-void Loading::DrawScene(void)
-{
-	if (isIndicator_)
-	{
-		SetDrawScreen(*screenHandle_);
-		ClsDrawScreen();
-		uiMng_->Draw();
-	}
-}
 
 BaseScene::SceneUptr Loading::MakeNextFunc(SceneUptr own)
 {
-	switch (type_)
-	{
-	case TransitionType::Fade:
-		return std::make_unique<Fade>(std::move(own), std::move(loadScene_), transTime_);
-	default:
-		return std::move(own);
-	}
+	return  std::move(after_);
 }

@@ -149,7 +149,6 @@ void ResultScene::DrawOwnScreen(float delta)
 	}
 	else
 	{
-		//DrawFormatString(775, 425, 0xffffff, "ñﬂÇÈÅF");
 		DrawGraph(875, 600, lpImageMng.GetID("./Resource/Image/Option/decision.png")[0], true);
 		DrawGraph(950, 600, paddata[lpConfigMng.GetJoypadInputCode().at(InputID::Attack)], true);
 	}

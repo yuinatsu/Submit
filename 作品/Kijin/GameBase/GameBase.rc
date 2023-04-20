@@ -43,7 +43,7 @@ BEGIN
 END
 
 #endif    // APSTUDIO_INVOKED
-
+IDI_ICON1               ICON                    "Resource\\icon.ico"
 #endif    // 日本語 (日本) リソース
 /////////////////////////////////////////////////////////////////////////////
 

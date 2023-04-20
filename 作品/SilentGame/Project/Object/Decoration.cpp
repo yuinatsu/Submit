@@ -53,7 +53,6 @@ bool Decoration::InitAnim(const std::string& fname, const std::string& state, co
 	drawFunc_ = [this](const Math::Vector2& offset, DrawMng& drawMng)
 	{
 		dynamic_cast<Animation&>(GetComponent(ComponentID::Animator)).Draw(drawMng, pos_ + offset, false);
-		//GetComponent(ComponentID::Collider).DbgDraw(offset);
 	};
 	dynamic_cast<Animation&>(GetComponent(ComponentID::Animator)).Update(lpSceneMng.GetRandom().GetRandom(0.0f,60.0f));
 	return rtn;

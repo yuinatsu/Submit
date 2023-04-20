@@ -1,37 +1,38 @@
 #include <DxLib.h>
 #include "BaseScene.h"
-#include "../Application.h"
+#include "../SceneManager.h"
 #include "../Object/ObjectManager.h"
 #include "../Common/ResourceMng.h"
 #include "../Common/Camera.h"
 #include "../UI/UiManager.h"
+#include "../Shader/PEManager.h"
 #include "../Common/Input/InputType/Keyboard.h"
 #include "../Common/Input/InputType/Pad.h"
 #include "../Common/Debug.h"
 BaseScene::BaseScene(ScreenID id, SceneID sceneID) :
-	scID_{ id }, nextID_{ sceneID }, isDrawBackScene_{ true }, isUpdateBackScene_{ false }
+	scID_{ id }, nextID_{ sceneID }
 {
 	// スクリーン作成
-	lpResourceMng.MakeRenderTarget(screenHandle_,scID_, lpApp.screenSize_<float>, true);
+	lpSceneMng.GetResourceMng().MakeRenderTarget(screenHandle_,scID_, lpSceneMng.screenSize_<float>, true);
 	
+	// カメラの作成
 	camera_ = std::make_unique<Camera>();
-	// コントローラの情報
+}
+
+BaseScene::BaseScene(std::unique_ptr<ObjectManager>&& objectManager, ScreenID id, SceneID sceneID) :
+	scID_{ id }, nextID_{ sceneID }, objMng_{std::move(objectManager)}
+{
+	// スクリーン作成
+	lpSceneMng.GetResourceMng().MakeRenderTarget(screenHandle_, scID_, lpSceneMng.screenSize_<float>, true);
+
+	// カメラの作成
+	camera_ = std::make_unique<Camera>();
 }
 
 BaseScene::~BaseScene()
 {
 }
 
-void BaseScene::Update(float delta, Controller& controller)
-{
-	if (isUpdateBackScene_)
-	{
-		if (back_)
-		{
-			back_->Update(delta, controller);
-		}
-	}
-}
 
 void BaseScene::Draw(void)
 {
@@ -47,36 +48,22 @@ bool BaseScene::IsLoaded(void)
 	return GetASyncLoadNum() <= 0;
 }
 
+void BaseScene::Back(void)
+{
+	// デフォルトは何もしない
+}
+
 BaseScene::SceneUptr BaseScene::Update(SceneUptr own, float delta, Controller& controller)
 {
 	Update(delta, controller);
 	if (nextID_ != GetID())
 	{
-		if (front_.size() != 0U)
-		{
-			if (front_.contains(nextID_))
-			{
-				// 前に当たるシーンの時現在のシーンを後ろにセットする
-				front_[nextID_]->SetBackScene(std::move(own));
-				front_[nextID_]->ChangeBackFront();
-				return std::move(front_[nextID_]);
-			}
-		}
 		
 		// 次のシーンのIDと一致してないとき
 		if (sceneMakeFuncMap_.contains(nextID_))
 		{
 			// 作成用functionがあるときそれを実行する
 			return sceneMakeFuncMap_[nextID_](std::move(own));
-		}
-		if (back_)
-		{
-			if (back_->GetID() == nextID_)
-			{
-				back_->SetFrontScene(std::move(own));
-				back_->ChangeBackFront();
-				return std::move(back_);
-			}
 		}
 	}
 	return own;
@@ -87,13 +74,7 @@ void BaseScene::ChangeSceneID(SceneID id)
 	nextID_ = id;
 }
 
-void BaseScene::ChangeBackScene(void)
-{
-	if (back_)
-	{
-		nextID_ = back_->GetID();
-	}
-}
+
 
 void BaseScene::SetMakeSceneFunc(std::function<SceneUptr(SceneUptr)>&& sceneMakeFunc, const SceneID id)
 {
@@ -102,11 +83,11 @@ void BaseScene::SetMakeSceneFunc(std::function<SceneUptr(SceneUptr)>&& sceneMake
 
 void BaseScene::Loaded(Controller& controller)
 {
+	// ロード終了したのでリストの中身をすべて実行する
 	std::for_each(loadedFunc_.begin(), loadedFunc_.end(), [&controller](LoadedFunc& f) { f(controller); });
-	for (auto& scene : front_)
-	{
-		scene.second->Loaded(controller);
-	}
+
+	// もう使わないのでクリアしとく
+	loadedFunc_.clear();
 }
 
 void BaseScene::AddLoadedFunc(LoadedFunc&& loadedFunc)
@@ -114,43 +95,7 @@ void BaseScene::AddLoadedFunc(LoadedFunc&& loadedFunc)
 	loadedFunc_.emplace_back(std::move(loadedFunc));
 }
 
-void BaseScene::SetBackScene(SceneUptr back)
-{
-	back_ = std::move(back);
-}
 
 
-void BaseScene::SetFrontScene(SceneUptr front)
-{
-	front_[front->GetID()] = std::move(front);
-}
-
-void BaseScene::ChangeBackFront(void)
-{
-	nextID_ = GetID();
-}
-
-void BaseScene::DrawSceneBackScene(void)
-{
-	if (isUpdateBackScene_ && isDrawBackScene_)
-	{
-		if (back_)
-		{
-			back_->DrawScene();
-		}
-	}
-
-}
-
-void BaseScene::DrawBackScene(void)
-{
-	if (isDrawBackScene_)
-	{
-		if (back_)
-		{
-			back_->Draw();
-		}
-	}
-}
 
 

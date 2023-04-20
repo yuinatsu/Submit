@@ -1,7 +1,7 @@
 #include "SharedHandle.h"
 #include <DxLib.h>
 #include <EffekseerForDXLib.h>
-#include "../Application.h"
+#include "../SceneManager.h"
 #include "../Common/Debug.h"
 #include "ResourceMng.h"
 
@@ -58,7 +58,7 @@ SharedGraphicHandle::~SharedGraphicHandle()
 {
 	if (ptr_ && ptr_.use_count() <= 2)
 	{
-		lpResourceMng.Remove(*this);
+		lpSceneMng.GetResourceMng().Remove(*this);
 		if (ptr_.use_count() == 1)
 		{
 			// 最後なのでDelete呼ぶ
@@ -73,7 +73,7 @@ SharedGraphicHandle& SharedGraphicHandle::operator=(const SharedGraphicHandle& s
 	if (ptr_ && ptr_.use_count() <= 2)
 	{
 		// 削除すべきだったら削除する
-		lpResourceMng.Remove(*this);
+		lpSceneMng.GetResourceMng().Remove(*this);
 		if (ptr_.use_count() == 1)
 		{
 			// 最後なのでDelete呼ぶ
@@ -85,6 +85,46 @@ SharedGraphicHandle& SharedGraphicHandle::operator=(const SharedGraphicHandle& s
 	return *this;
 }
 
+SharedDivGraphicHandle::SharedDivGraphicHandle(const int handle) :
+	SharedHandle{ handle }
+{
+}
+
+SharedDivGraphicHandle::SharedDivGraphicHandle(const SharedDivGraphicHandle& sharedHandle) noexcept :
+	SharedHandle{ sharedHandle }
+{
+}
+
+SharedDivGraphicHandle::~SharedDivGraphicHandle()
+{
+	if (ptr_ && ptr_.use_count() <= 2)
+	{
+		lpSceneMng.GetResourceMng().Remove(*this);
+	}
+}
+
+SharedDivGraphicHandle& SharedDivGraphicHandle::operator=(const SharedDivGraphicHandle& sharedHandle) noexcept
+{
+
+	if (ptr_ && ptr_.use_count() <= 2)
+	{
+		// 削除すべきだったら削除する
+		lpSceneMng.GetResourceMng().Remove(*this);
+	}
+	ptr_ = sharedHandle.ptr_;
+	handles_ = sharedHandle.handles_;
+	return *this;
+}
+
+const int SharedDivGraphicHandle::operator[](size_t idx) const
+{
+	return handles_[idx];
+}
+
+void SharedDivGraphicHandle::Set(const std::span<int> handles)
+{
+	handles_ = handles;
+}
 
 SharedModelHandle::~SharedModelHandle()
 {
@@ -92,7 +132,7 @@ SharedModelHandle::~SharedModelHandle()
 	if (ptr_ && ptr_.use_count() <= 2)
 	{
 		// 大元になるハンドルを削除
-		lpResourceMng.RemoveModel(*ptr_);
+		lpSceneMng.GetResourceMng().RemoveModel(*ptr_);
 	}
 }
 
@@ -102,7 +142,7 @@ SharedModelHandle& SharedModelHandle::operator=(const SharedModelHandle& sharedH
 	if (ptr_ && ptr_.use_count() <= 2)
 	{
 		// 大元になるハンドルを削除
-		lpResourceMng.RemoveModel(*ptr_);
+		lpSceneMng.GetResourceMng().RemoveModel(*ptr_);
 	}
 	ptr_ = sharedHandle.ptr_;
 	CopyParent();
@@ -144,7 +184,7 @@ SharedShaderHandle::~SharedShaderHandle()
 {
 	if (ptr_ && ptr_.use_count() <= 2)
 	{
-		lpResourceMng.Remove(*this);
+		lpSceneMng.GetResourceMng().Remove(*this);
 		if (ptr_.use_count() == 1)
 		{
 			DeleteShader(*ptr_);
@@ -157,7 +197,7 @@ SharedShaderHandle& SharedShaderHandle::operator=(const SharedShaderHandle& shar
 {
 	if (ptr_ && ptr_.use_count() <= 2)
 	{
-		lpResourceMng.Remove(*this);
+		lpSceneMng.GetResourceMng().Remove(*this);
 		if (ptr_.use_count() == 1)
 		{
 			DeleteShader(*ptr_);
@@ -176,7 +216,7 @@ SharedSoundHandle::~SharedSoundHandle()
 	{
 		if (ptr_.use_count() <= 2)
 		{
-			lpResourceMng.RemoveSound(*ptr_);
+			lpSceneMng.GetResourceMng().RemoveSound(*ptr_);
 		}
 		DeleteSoundMem(handle_);
 		ptr_.reset();
@@ -188,7 +228,7 @@ SharedSoundHandle& SharedSoundHandle::operator=(const SharedSoundHandle& sharedH
 	DeleteSoundMem(handle_);
 	if (ptr_ && ptr_.use_count() <= 2)
 	{
-		lpResourceMng.RemoveSound(*ptr_);
+		lpSceneMng.GetResourceMng().RemoveSound(*ptr_);
 	}
 	ptr_ = sharedHandle.ptr_;
 	handle_ = DuplicateSoundMem(*ptr_);
@@ -249,7 +289,7 @@ SharedRenderTargetHandle::~SharedRenderTargetHandle()
 {
 	if (ptr_ && ptr_.use_count() <= 2)
 	{
-		lpResourceMng.Remove(id_);
+		lpSceneMng.GetResourceMng().Remove(id_);
 		DeleteGraph(*ptr_);
 	}
 }
@@ -258,7 +298,7 @@ SharedRenderTargetHandle& SharedRenderTargetHandle::operator=(const SharedRender
 {
 	if (ptr_ && ptr_.use_count() <= 2)
 	{
-		lpResourceMng.Remove(id_);
+		lpSceneMng.GetResourceMng().Remove(id_);
 		DeleteGraph(*ptr_);
 		ptr_.reset();
 	}

@@ -23,9 +23,6 @@ KeyConfigOption::KeyConfigOption(Controller& controller) :
 	menuUICtrl_->AddMenu(SettingType::ItemLeft, std::make_unique<MenuUI>(Math::Vector2{ 500.0f,277.5f }, "Resource/Input/ItemLeft.png"));
 	menuUICtrl_->AddMenu(SettingType::ItemRight, std::make_unique<MenuUI>(Math::Vector2{ 500.0f,327.5f }, "Resource/Input/ItemRight.png"));
 	menuUICtrl_->AddMenu(SettingType::Attack, std::make_unique<MenuUI>(Math::Vector2{ 500.0f,377.5f }, "Resource/Input/Attack.png"));
-	//menuUICtrl_->AddMenu(SettingType::btn1, std::make_unique<MenuUI>(Math::Vector2{ 500.0f,437.5f }, "Resource/Input/Menu.png"));
-	//menuUICtrl_->AddMenu(SettingType::Init, std::make_unique<MenuUI>(Math::Vector2{ 500.0f,467.5f }, "Resource/Input/Default.png"));
-	//menuUICtrl_->AddMenu(SettingType::Exit, std::make_unique<MenuUI>(Math::Vector2{ 500.0f,517.5f }, "Resource/Input/Exit.png"));
 	menuUICtrl_->AddMenu(SettingType::Init, std::make_unique<MenuUI>(Math::Vector2{ 500.0f,437.5f }, "Resource/Input/Default.png"));
 	menuUICtrl_->AddMenu(SettingType::Exit, std::make_unique<MenuUI>(Math::Vector2{ 500.0f,477.5f }, "Resource/Input/Exit.png"));
 	updata_ = std::bind(&KeyConfigOption::UpdateKeyConfig, this, std::placeholders::_1);
@@ -71,10 +68,6 @@ bool KeyConfigOption::UpdateKeyConfig(float delta)
 			inputID_ = InputID::Attack;
 			flag = true;
 			break;
-		//case SettingType::btn1:
-		//	inputID_ = InputID::btn1;
-		//	flag = true;
-		//	break;
 		case SettingType::Init:
 			lpConfigMng.SetDefalutKeyCode();
 			lpConfigMng.SetDefalutPadCode();
@@ -123,7 +116,6 @@ void KeyConfigOption::DrawPadConfig(void)
 		DrawGraph(800, static_cast<int>(menuUICtrl_->GetUI(SettingType::ItemLeft).GetLT().y), data[lpConfigMng.GetJoypadInputCode().at(InputID::ItemLeft)], true);
 		DrawGraph(800, static_cast<int>(menuUICtrl_->GetUI(SettingType::ItemRight).GetLT().y), data[lpConfigMng.GetJoypadInputCode().at(InputID::ItemRight)], true);
 		DrawGraph(800, static_cast<int>(menuUICtrl_->GetUI(SettingType::Attack).GetLT().y), data[lpConfigMng.GetJoypadInputCode().at(InputID::Attack)], true);
-		//DrawGraph(800, menuUICtrl_->GetUI(SettingType::btn1).GetLT().y, data[lpConfigMng.GetJoypadInputCode().at(InputID::btn1)], true);
 	}
 	else
 	{
@@ -133,7 +125,6 @@ void KeyConfigOption::DrawPadConfig(void)
 		DrawGraph(800, static_cast<int>(menuUICtrl_->GetUI(SettingType::ItemLeft).GetLT().y), data[lpConfigMng.GetJoypadInputCode().at(InputID::ItemLeft)], true);
 		DrawGraph(800, static_cast<int>(menuUICtrl_->GetUI(SettingType::ItemRight).GetLT().y), data[lpConfigMng.GetJoypadInputCode().at(InputID::ItemRight)], true);
 		DrawGraph(800, static_cast<int>(menuUICtrl_->GetUI(SettingType::Attack).GetLT().y), data[lpConfigMng.GetJoypadInputCode().at(InputID::Attack)], true);
-		//DrawGraph(800, menuUICtrl_->GetUI(SettingType::btn1).GetLT().y, data[lpConfigMng.GetJoypadInputCode().at(InputID::btn1)], true);
 	}
 
 }
@@ -146,7 +137,6 @@ void KeyConfigOption::DrawKeyBoardConfig(void)
 	DrawGraph(800, static_cast<int>(menuUICtrl_->GetUI(SettingType::ItemLeft).GetLT().y), data[lpConfigMng.GetKeyInputCode().at(InputID::ItemLeft)], true);
 	DrawGraph(800, static_cast<int>(menuUICtrl_->GetUI(SettingType::ItemRight).GetLT().y), data[lpConfigMng.GetKeyInputCode().at(InputID::ItemRight)], true);
 	DrawGraph(800, static_cast<int>(menuUICtrl_->GetUI(SettingType::Attack).GetLT().y), data[lpConfigMng.GetKeyInputCode().at(InputID::Attack)], true);
-	//DrawGraph(800, menuUICtrl_->GetUI(SettingType::btn1).GetLT().y, data[lpConfigMng.GetKeyInputCode().at(InputID::btn1)], true);
 }
 
 bool KeyConfigOption::UpdateSet(float delta)
@@ -201,7 +191,6 @@ bool KeyConfigOption::UpdateSet(float delta)
 
 void KeyConfigOption::DrawSet(void)
 {
-	//DrawFormatString(600, 290, 0xffffff, "どのキーに変更しますか？");
 	DrawGraph(600, 280, lpImageMng.GetID("./Resource/Image/Option/Confirmation.png")[0], true);
 	if (controller_.GetCntType() == CntType::Key)
 	{

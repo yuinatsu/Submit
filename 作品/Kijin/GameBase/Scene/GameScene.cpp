@@ -1,141 +1,232 @@
 #include "GameScene.h"
 #include <EffekseerForDXLib.h>
-#include "../Application.h"
+#include "../SceneManager.h"
 #include "TitleScene.h"
 #include "../Common/Camera.h"
 #include "../Object/ObjectManager.h"
 #include "../UI/UiManager.h"
+#include "../Shader/PEManager.h"
 #include "../Factory/StageFactory.h"
 #include "PauseScene.h"
 #include "../Common/ResourceMng.h"
 #include "../Component/Transform/Transform.h"
-#include "Transition/Loading.h"
-#include "../Common/Debug.h"
-
+#include "Transition/FadeLoading.h"
 #include "../Common/SoundPross.h"
-#include "Transition/Fade.h"
-#include "Transition/TransitionType.h"
 #include "ResultScene.h"
 #include "../Common/SoundPross.h"
+#include "../Component/Behavior/ThrusterBehavior.h"
+#include "../Common/Input/InputConfig/InputConfig.h"
+#include "../Component/Behavior/CameraBehavior.h"
+#include "../Component/Behavior/StageBehavior.h"
+#include "../Common/Debug.h"
 
-GameScene::GameScene() :
-	BaseScene{ScreenID::Game,SceneID::Game}
+GameScene::GameScene(StageID stageID) :
+	BaseScene{ ScreenID::Game,SceneID::Game }, stageID_{stageID}
 {
-	SetMakeSceneFunc(std::bind(&GameScene::MakeResultFunc,this, std::placeholders::_1),SceneID::Result);
+	SetMakeSceneFunc(std::bind(&GameScene::MakeResultFunc, this, std::placeholders::_1), SceneID::Result);
+	SetMakeSceneFunc(std::bind(&GameScene::MakePauseFunc, this, std::placeholders::_1), SceneID::Pause);
 	objMng_ = std::make_unique<ObjectManager>(10);
-	objMng_->AddFactory(std::make_unique<StageFactory>("Resource/Other/Stage.data", * objMng_));
+	peMng_ = std::make_unique<PEManager>();
 
-	uiMng_ = std::make_unique<UiManager>(SceneID::Game);
+	// ゲームシーン用のBGMのロード
+	lpSooundPross.Init(SceneID::Game);
+
+
+	// ゲームシーンのBGMの再生
+	lpSooundPross.PlayBackSound(SOUNDNAME_BGM::GameSceneStage1BGM, true, false);
+
+	if (stageID_ == StageID::Tutorial)
+	{
+		// チュートリアル時
+		uiMng_ = std::make_unique<UiManager>("Resource/Other/UiData/game.ui", true, true, false);
+		objMng_->AddFactory(std::make_unique<StageFactory>(*objMng_));
+		SetMakeSceneFunc(std::bind(&GameScene::MakeSelectFunc, this, std::placeholders::_1), SceneID::Select);
+	}
+	else
+	{
+		// 通常時のゲーム時
+		objMng_->AddFactory(std::make_unique<StageFactory>("Resource/Other/Stage" + std::to_string(static_cast<int>(stageID)) + ".data", *objMng_));
+		uiMng_ = std::make_unique<UiManager>("Resource/Other/UiData/game.ui", true,false, false);
+		lpSceneMng.GetResourceMng().MakeRenderTarget(resultCapture_, ScreenID::ResultCapture, SceneManager::screenSize_<float>, true);
+	}
+	AddLoadedFunc(std::bind(&GameScene::Loaded, this, std::placeholders::_1));
 	result_ = ResultAttribute::Max;
 
 	// ゲームシーンで使うシェーダをあらかじめロードしておく
 	useShaders_.resize(3);
-	lpResourceMng.LoadVS(useShaders_[0], "Resource/resource/Shader/Vertex/Mesh.vso");
-	lpResourceMng.LoadVS(useShaders_[1], "Resource/resource/Shader/Vertex/Mesh4.vso");
-	lpResourceMng.LoadPS(useShaders_[2], "Resource/resource/Shader/Pixel/Tex.pso");
-	
-	SetFrontScene(std::make_unique<PauseScene>());
+	lpSceneMng.GetResourceMng().LoadVS(useShaders_[0], "Resource/resource/Shader/Vertex/Mesh.vso");
+	lpSceneMng.GetResourceMng().LoadVS(useShaders_[1], "Resource/resource/Shader/Vertex/Mesh4.vso");
+	lpSceneMng.GetResourceMng().LoadPS(useShaders_[2], "Resource/resource/Shader/Pixel/Tex.pso");
 
-	AddLoadedFunc(std::bind(&GameScene::Loaded, this, std::placeholders::_1));
+	SetLightDirection(VGet(1.0f, -1.0f, 1.0f));
+	SetLightDifColor(GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
+	SetLightSpcColor(GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
+	SetLightAmbColor(GetColorF(0.5f, 0.5f, 0.5f, 1.0f));
 
-	SetLightDirection(VGet(1.f, -1.f, 1.f));
-	SetLightDifColor(GetColorF(1.f, 1.f, 1.f, 1.f));
-	SetLightSpcColor(GetColorF(1.f, 1.f, 1.f, 1.f));
-	SetLightAmbColor(GetColorF(0.5f, 0.5f, 0.5f, 1.f));
-	PostTex_ = MakeScreen(1280, 720, false);
-
-	// 作成する画像のフォーマットを1チャネル、16ビットにsる
+	int x, y;
+	GetDrawScreenSize(&x, &y);
+	// シャドウマップを作成する際に高いフォーマット設定はいらないので設定を下げる
+	// 次に作成する画像のフォーマットの設定をする
 	SetDrawValidFloatTypeGraphCreateFlag(true);
+	// チャネルを１にする
 	SetCreateDrawValidGraphChannelNum(1);
+	// ビット数を16にする
 	SetCreateGraphColorBitDepth(16);
-	shadowMap_ = MakeScreen(1280, 720, false);
+	// シャドウマップ
+	shadowMap_ = MakeScreen(x, y, false);
+
 	// 元に戻す
 	SetDrawValidFloatTypeGraphCreateFlag(false);
 	SetCreateDrawValidGraphChannelNum(4);
 	SetCreateGraphColorBitDepth(32);
-	
-	// カメラ情報の初期化
-	cbuffer_ = CreateShaderConstantBuffer(sizeof(LIGHT_MAT) * 4);
-	auto p = GetBufferShaderConstantBuffer(cbuffer_);
-	lightMat_ = static_cast<LIGHT_MAT*>(GetBufferShaderConstantBuffer(cbuffer_));
-	lightM_.view = MGetIdent();
-	lightM_.proj = MGetIdent();
+	// 被写界深度
+	depth_ = MakeScreen(x, y, false);
 
-	// ゲームシーン用のBGMのロード
-	SoundProcess::Init(SceneID::Game);
+	// オフスクリーンの初期化
+	offScreen_ = MakeScreen(x, y, false);
+	// スカイドームのスクリーン
+	skyScreen_ = MakeScreen(x, y, false);
+	// スカイドームとステージのスクリーン
+	subScreen_ = MakeScreen(x, y, false);
+
+	// シャドウマップ用カメラ情報の初期化
+	SetUseASyncLoadFlag(false);
+	shadowBuff_ = CreateShaderConstantBuffer(sizeof(LIGHT_MAT) * 4);
+	lightMat_ = static_cast<LIGHT_MAT*>(GetBufferShaderConstantBuffer(shadowBuff_));
+	lightMat.view = MGetIdent();
+	lightMat.proj = MGetIdent();
+
+	// 被写界深度用のカメラ情報の初期化
+	depthbuffer_ = CreateShaderConstantBuffer(sizeof(DepthParam) * 4);
+	depthMat_ = static_cast<DepthParam*>(GetBufferShaderConstantBuffer(depthbuffer_));
+	depthMat.start = 0.0f;
+	depthMat.end = 0.0f;
+	depthMat.scope = 0.0f;
+	SetUseASyncLoadFlag(true);
+
+	SetAlwaysRunFlag(true);
+
+#ifdef _DEBUG
+	SetMakeSceneFunc(std::bind(&GameScene::MakeSelectFunc, this, std::placeholders::_1), SceneID::Select);
+#endif
+}
+
+GameScene::~GameScene()
+{
+	DeleteShaderConstantBuffer(shadowBuff_);
+	DeleteShaderConstantBuffer(depthbuffer_);
+	DeleteGraph(shadowMap_);
+	DeleteGraph(depth_);
+}
+
+void GameScene::Capture(void)
+{
+	// 一度Ui以外を描画する
+	SetupShadowMap();
+	SetOffsetScreen();
+	SetSubScreen();
+	SetUpDepth();
+	depthMat_[0] = depthMat;
+	peMng_->SetBuffer(depthbuffer_);
+	peMng_->Draw(offScreen_, *screenHandle_, depth_, skyScreen_, subScreen_);
+
+	// 描画結果をキャプチャする
+	SetDrawScreen(*screenHandle_);
+	GetDrawScreenGraph(0, 0, SceneManager::screenSize_<int>.x, SceneManager::screenSize_<int>.y, *resultCapture_);
+}
+
+void GameScene::SetUp(void)
+{
+	peMng_->SetFlag(PEID::Mono, lpConfigMng.GetPeConfig().at(PEID::Mono));
+	peMng_->SetFlag(PEID::VolFog, lpConfigMng.GetPeConfig().at(PEID::VolFog));
+
+	auto cam = objMng_->GetComponent<CameraBehavior>(objMng_->GetCameraID());
+	if (cam.IsActive())
+	{
+		cam->SetSpeed(lpConfigMng.GetCameraSpeed());
+	}
 }
 
 BaseScene::SceneUptr GameScene::MakeResultFunc(SceneUptr own)
 {
-	return std::make_unique<Fade>(std::move(own), std::make_unique<Loading>(std::make_unique<ResultScene>(result_), TransitionType::Fade, 1.0f, false), 1.0f);
+	SetAlwaysRunFlag(false);
+	Capture();
+
+	// リザルトではループされているサウンドを止める（念のためにアフターバーナーも止める)
+	lpSooundPross.SoundStop(SOUNDNAME_BGM::GameSceneStage1BGM);
+	lpSooundPross.SoundStop(SOUNDNAME_SE::playerMove);
+	lpSooundPross.SoundStop(SOUNDNAME_SE::playerAB);
+
+	return std::make_unique<FadeLoading>(std::move(own), std::make_unique<ResultScene>(stageID_ ,result_, resultCapture_), 1.0f);
+}
+
+BaseScene::SceneUptr GameScene::MakePauseFunc(SceneUptr own)
+{
+	SetAlwaysRunFlag(false);
+	return std::make_unique<PauseScene>(std::move(own));
+}
+
+BaseScene::SceneUptr GameScene::MakeSelectFunc(SceneUptr own)
+{
+	SetAlwaysRunFlag(false);
+	return std::make_unique<FadeLoading>(std::move(own), std::make_unique<TitleScene>(), 0.5f);
 }
 
 void GameScene::Update(float delta, Controller& controller)
 {
-	if (controller.Pressed(InputID::btn1))
+	if (controller.PressdCancel() || !GetWindowActiveFlag())
 	{
 		ChangeSceneID(SceneID::Pause);
 		return;
 	}
-	
+
+#ifdef _DEBUG
+	if (CheckHitKey(KEY_INPUT_1))
+	{
+		ChangeSceneID(SceneID::Select);
+		return;
+	}
+	if (CheckHitKey(KEY_INPUT_2))
+	{
+		SetResult(ResultAttribute::Clear);
+		ChangeSceneID(SceneID::Result);
+		return;
+	}
+	if (CheckHitKey(KEY_INPUT_3))
+	{
+		/*auto id = objMng_->GetFactory(FactoryID::HorizontalEffect).Create(ObjectID{}, {0.0f, 100.0f, 0.0f});
+		objMng_->Begin(id);*/
+	}
+#endif
 	
 	auto player = (objMng_->GetComponent<Transform>(objMng_->GetPlayerID()));
 	objMng_->Update(delta, controller, *this);
-	// ゲーム終了判定
-	if (!player.IsActive())
-	{
-		// ゲームオーバー
-		result_ = ResultAttribute::GameOver;
-		ChangeSceneID(SceneID::Result);
-		SoundProcess::Release();
-	}
 	uiMng_->Update(delta, *this, *objMng_, controller);
-	camera_->SetPos(player->GetPos());
-	camera_->Update(controller);
+	peMng_->Update(delta);
 
 	// エフェクシアの更新
-	//UpdateEffekseer3D();
+	UpdateEffekseer3D();
 }
 
 void GameScene::DrawScene(void)
 {
-	//// シャドウマップ作成
-	//SetupShadowMap();
-	//ClsDrawScreen();
-	//SetupBokeTex();
-	//ClsDrawScreen();
-	//camera_->SetUpScreen();
-	//// 描画
-	//objMng_->ShadowDraw(shadowMap_,cbuffer_);
-	////objMng_->Draw();
-	//// エフェクシアの描画
-	////DrawEffekseer3D();
-	//// 3D系のデバッグ描画
-	//DebugDraw3DScreen();
-	//// UIの描画
-	//uiMng_->Draw();
-	////DrawRotaGraph(133, 83, 0.25, 0.0, shadowMap_, true);
-	//DrawRotaGraph(133, 83, 0.25, 0.0, bokeTex_, true);
-	//// ポストエフェクト
-	//DrawFormatString(0, 0, 0xffffff, TEXT("%dIDのシーンです"), static_cast<unsigned int>(scID_));
-	
 	// シャドウマップ作成
 	SetupShadowMap();
-	SetupPostEffect();
-	ClsDrawScreen();
-	
-	// ポストエフェクト
-	//SetPostEffect(true, 0, 0, Tex_, PostPS_);
-	SetPostEffect(false, 0, 0, PostTex_, PostPS_);
+	// オフスクリーンの作成
+	SetOffsetScreen();
+	// メイン以外のスクリーンの作成
+	SetSubScreen();
+
+	// 被写界深度用の深度テクスチャの作成
+	SetUpDepth();
+
+	depthMat_[0] = depthMat;
+	peMng_->SetBuffer(depthbuffer_);
+	// ポストエフェクトか通常描画
+	peMng_->Draw(offScreen_, *screenHandle_,depth_,skyScreen_,subScreen_);
 
 	// UIの描画
-	uiMng_->Draw();
-
-	DrawRotaGraph(133, 83, 0.25, 0.0, shadowMap_, true);
-	//DrawRotaGraph(133, 83, 0.25, 0.0, bokeTex_, true);
-
-
-	DrawFormatString(0, 0, 0xffffff, TEXT("%dIDのシーンです"), static_cast<unsigned int>(scID_));
+	uiMng_->Draw(*screenHandle_);
 }
 
 void GameScene::SetupShadowMap(void)
@@ -146,119 +237,123 @@ void GameScene::SetupShadowMap(void)
 	SetBackgroundColor(255, 255, 255);
 	ClsDrawScreen();
 	SetBackgroundColor(0, 0, 0);
-	// カメラの描画範囲と見える位置を設定
-	SetupCamera_Ortho(offsetOrtho);
-	SetCameraNearFar(offsetNear, offsetFar);
-	// カメラの向きをライトの向きに合わせる
-	auto lightDir = GetLightDirection();
-	auto lightPos = VAdd(VGet(camTar.x, camTar.y, camTar.z), VScale(lightDir, -5000));
-	SetCameraPositionAndTarget_UpVecY(lightPos, VGet(camTar.x, camTar.y, camTar.z));
+
+	// シャドウマップ用にカメラをセット
+	auto player = objMng_->GetComponent<Transform>(objMng_->GetPlayerID());
+	if (player.IsActive())
+	{
+		auto& pPos = player->GetPos();
+		Vector3 pTar = Vector3(pPos.x + camTar.x, camTar.y, pPos.z - camTar.z);
+		camera_->SetUpShadow(offsetOrtho, offsetNear, offsetFar, pTar);
+	}
+
 	MV1SetUseOrigShader(true);
-	objMng_->SetupShadowMap();
+	objMng_->SetupDepthTex(*shadowPs_, -1);
 	MV1SetUseOrigShader(false);
 
-	lightM_.view = GetCameraViewMatrix();
-	lightM_.proj = GetCameraProjectionMatrix();
+	// シャドウマップ作成に使ったカメラ情報を取得
+	lightMat.view = GetCameraViewMatrix();
+	lightMat.proj = GetCameraProjectionMatrix();
 	// 描画用に切り替え
-	SetDrawScreen(PostTex_);
+	SetDrawScreen(offScreen_);
 	ClsDrawScreen();
-	lightMat_[0] = lightM_;
+	// さっき取得したカメラ情報をhlsl側に渡す
+	lightMat_[0] = lightMat;
 }
 
-void GameScene::SetupPostEffect(void)
+void GameScene::SetUpDepth(void)
 {
+	// 描画先を影用深度記録画像に変更
+	SetDrawScreen(depth_);
+	// 影用深度記録画像を一度真っ白にする
+	SetBackgroundColor(255, 255, 255);
+	ClsDrawScreen();
+	SetBackgroundColor(0, 0, 0);
 	camera_->SetUpScreen();
 
-	// 描画
+	// 被写界深度開始位置の計算
+	depthMat.start = dofFocus - dofFocusSize / 2.0f - dofInterpSize;
+	// 被写界深度終了位置を計算
+	depthMat.end = dofFocus + dofFocusSize / 2.0f + dofInterpSize;
+	// 被写界深度の範囲の逆数を計算
+	depthMat.scope = 1.0f / (depthMat.end - depthMat.start);
+	// 補間範囲とフォーカスがあっている範囲を含めた総距離を算出
+	dofTotalSize_ = dofInterpSize * 2.0f + dofFocusSize;
 
-	objMng_->ShadowDraw(shadowMap_, cbuffer_);
+	// 取得したデータをhlsl側に渡す
+	depthMat_[0] = depthMat;
+	MV1SetUseOrigShader(true);
+	objMng_->SetupDepthTex(*depthPS_, depthbuffer_);
 	MV1SetUseOrigShader(false);
 
+	// 描画用に切り替え
+	SetDrawScreen(*screenHandle_);
+	ClsDrawScreen();
+	// 被写界深度開始位置の計算
+	depthMat.start = dofInterpSize / dofTotalSize_;
+	// 被写界深度終了位置の計算
+	depthMat.end = (dofInterpSize + dofFocusSize) / dofTotalSize_;
 
-	//objMng_->Draw();
+}
+
+void GameScene::SetOffsetScreen(void)
+{
+	camera_->SetUpScreen();	
+
+	// 描画
+	objMng_->ShadowDraw(shadowMap_,shadowBuff_);
+	MV1SetUseOrigShader(false);
 
 	// エフェクシアの描画
-	//DrawEffekseer3D();
+	Effekseer_Sync3DSetting();
+	DrawEffekseer3D();
 
 	// 3D系のデバッグ描画
 	DebugDraw3DScreen();
-
 
 	SetDrawScreen(*screenHandle_);
 	ClsDrawScreen();
 }
 
-
-void GameScene::SetPostEffect(bool flag, int x, int y, int img, int Postps)
+void GameScene::SetSubScreen(void)
 {
-	int width, height;
-	GetGraphSize(img, &width, &height);
-	std::array <VERTEX2DSHADER, 4> verts;
-
-	if (flag)
-	{
-		for (auto& v : verts)
-		{
-			v.rhw = 1.0;
-			v.dif = GetColorU8(0xff, 0xff, 0xff, 0xff); // ディフューズ
-			v.spc = GetColorU8(255, 255, 255, 255);		// スペキュラ
-			v.su = 0.0f;
-			v.sv = 0.0f;
-			v.pos.z = 0.0f;
-		}
-		// 左上
-		verts[0].pos.x = x;
-		verts[0].pos.y = y;
-		verts[0].u = 0.0f;
-		verts[0].v = 0.0f;
-		// 右上
-		verts[1].pos.x = x + width;
-		verts[1].pos.y = y;
-		verts[1].u = 1.0f;
-		verts[1].v = 0.0f;
-		// 左下
-		verts[2].pos.x = x;
-		verts[2].pos.y = y + height;
-		verts[2].u = 0.0f;
-		verts[2].v = 1.0f;
-		// 右下
-		verts[3].pos.x = x + width;
-		verts[3].pos.y = y + height;
-		verts[3].u = 1.0f;
-		verts[3].v = 1.0f;
-		SetUsePixelShader(Postps);
-
-		SetUseTextureToShader(0, img);
-		DrawPrimitive2DToShader(verts.data(), verts.size(), DX_PRIMTYPE_TRIANGLESTRIP);
-		MV1SetUseOrigShader(false);
-	}
-	else if (!flag)
-	{
-		DrawGraph(0, 0, img, true);
-	}
-	SetUseTextureToShader(0, -1);
+	// スカイドームのみのスクリーン
+	SetDrawScreen(skyScreen_);
+	ClsDrawScreen();
+	camera_->SetUpScreen();
+	auto [result, id] = objMng_->Find(ObjectAttribute::Sky);
+	objMng_->GetComponent<Render>(id)->Draw();
+	
+	// スカイドームとステージのみのスクリーン
+	SetDrawScreen(subScreen_);
+	ClsDrawScreen();
+	camera_->SetUpScreen();
+	auto [result1, id1] = objMng_->Find(ObjectAttribute::Stage);
+	objMng_->GetComponent<Render>(id)->Draw();
+	objMng_->GetComponent<Render>(id1)->Draw();
 }
 
 bool GameScene::IsLoaded(void)
 {
-	if (BaseScene::IsLoaded() && objMng_->IsLoaded())
-	{
-		return true;
-	}
-	return false;
+	return BaseScene::IsLoaded() && objMng_->IsLoaded() && uiMng_->IsLoaded();
 }
 
 void GameScene::Loaded(Controller& controller)
 {
 	// ロード完了時に呼ばれる
-	lpResourceMng.Loaded();
+	lpSceneMng.GetResourceMng().Loaded();
 	objMng_->Begin(); 
 	objMng_->Update(0.0f, controller, *this);
-	auto player = (objMng_->GetComponent<Transform>(objMng_->GetPlayerID()));
-	camera_->SetPos(player->GetPos());
-	camera_->Update(controller);
-	uiMng_->Begin();
+	uiMng_->Begin(*this);
 
-	SoundProcess::PlayBackSound(SoundProcess::SOUNDNAME_BGM::GameSceneBGM, SoundProcess::GetVolume(), true);	// ゲームシーンのBGM
-	PostPS_ = LoadPixelShader(L"Resource/resource/Shader/PostEffect/mono.pso");
+	
+	lpSceneMng.GetResourceMng().LoadPS(shadowPs_, "Resource/resource/Shader/ShadowMap/ShadowMap.pso");
+	lpSceneMng.GetResourceMng().LoadPS(depthPS_, "Resource/resource/Shader/PostEffect/Dof/depth.pso");
+	SetUp();
+	UpdateEffekseer3D();
+}
+
+void GameScene::Back(void)
+{
+	SetAlwaysRunFlag(true);
 }

@@ -1,19 +1,25 @@
 #include "ObjectID.h"
 
-std::hash<std::string> ObjectID::hash_;
+std::hash<long long> ObjectID::hash_;
 
 ObjectID::ObjectID()
 {
 	id_ = 0ull;
 }
 
-ObjectID::ObjectID(const std::string& idseed)
+ObjectID::ObjectID(long long seed)
 {
-	id_ = hash_(idseed);
+	id_ = hash_(seed);
 }
+
 
 ObjectID::ObjectID(const ObjectID& objID) :
 	id_{objID.id_}
+{
+}
+
+ObjectID::ObjectID(const size_t& val) :
+	id_{ val }
 {
 }
 

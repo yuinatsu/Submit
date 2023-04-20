@@ -1,97 +1,132 @@
-#pragma once
+	#pragma once
 #include <DxLib.h>
-#include <cmath>
-#include <string>
-
+#include <array>
 #include "../Scene/SceneID.h"
-#include "../Scene/BaseScene.h"
-#include "ScreenID.h"
 
-namespace SoundProcess
+#define lpSooundPross SoundProcess::GetInstance()
+
+//SEの種類
+enum class SOUNDNAME_SE
 {
-	//SEの種類
-	enum class SOUNDNAME_SE
-	{
-		playerMove,
-		playerDash,
-		playerHit,
-		playerAttack,
-		playerAttackHit,
-		playerJump,
-		playerDestory,
-		enemyAttack,
-		enemyDestroy,
-		select,
-		Max
-	};
+	playerMove,
+	playerDash,
+	playerAB,
+	playerHit,
+	playerAttack,
+	playerSpetial,
+	playerAttackHit,
+	playerJump,
+	playerDestory,
+	enemyAttack,
+	enemyDestroy,
+	select,
+	openMenu,
+	cursorMove,
+	click,
+	enter,
+	Max
+};
 
-	// BGMの種類
-	enum class SOUNDNAME_BGM
+// BGMの種類
+enum class SOUNDNAME_BGM
+{
+	TitleSceneBGM,
+	TutorialSceneBGM,
+	GameSceneStage1BGM,
+	GameSceneStage2BGM,
+	ResultClearBGM,
+	ResultFailBGM,
+	Max
+};
+
+constexpr int seNum = static_cast<int>(SOUNDNAME_SE::Max) + 1;				// SEの数
+constexpr int bgmNum = static_cast<int>(SOUNDNAME_BGM::Max) + 1;			// BGMの数
+
+class SoundProcess
+{
+public:
+
+	static SoundProcess& GetInstance(void)
 	{
-		TitleSceneBGM,
-		GameSceneBGM,
-		ResultSceneBGM,
-		Max
-	};
+		static SoundProcess s_Instance;
+		return s_Instance;
+	}
 
 	// 初期化
-	void Init();
 	void Init(SceneID nowScene);
-
 
 	// ロード
 	void Load(int loadFile, SOUNDNAME_SE name);		// SEのロード
 	void Load(int loadFile, SOUNDNAME_BGM name);	// BGMのロード
 
-	// SEの再生
-	void PlayBackSound(SOUNDNAME_SE name, float volume,bool loopflag);
+	/// <summary>
+	/// SEの再生
+	/// </summary>
+	/// <param name="name">SEの種類</param>
+	/// <param name="loopflag">ループするかどうか</param>
+	void PlayBackSound(SOUNDNAME_SE name, bool loopflag);
 
-	// BGMの再生
-	void PlayBackSound(SOUNDNAME_BGM name, float volume, bool loopflag);
+	/// <summary>
+	/// BGMの再生
+	/// </summary>
+	/// <param name="name">BGMの種類</param>
+	/// <param name="loopflag">ループするかどうか</param>
+	/// <param name="topPotisionflag">途中から再生するかどうか</param>
+	void PlayBackSound(SOUNDNAME_BGM name,bool loopflag, bool topPotisionflag);
 
-	// SEを止める
+	/// <summary>
+	/// SEを止める
+	/// </summary>
+	/// <param name="name">名前</param>
 	void SoundStop(SOUNDNAME_SE name);
 
-	// BGMを止める
+	/// <summary>
+	/// BGMを止める
+	/// </summary>
+	/// <param name="name">名前</param>
 	void SoundStop(SOUNDNAME_BGM name);
 
-	/// 止めていたSEを再生する ///
-	/// <name> 流したいSEを指定 ///
-	/// <loopflag> ループをするかを指定 ///
-	/// <loopTime> 曲が流れて何秒立ったかの指定 ///
-	void SoundPlay(SOUNDNAME_SE name, bool loopflag, float loopTime);
-	
-	/// 止めていたBGMを再生する ///
-	/// <name> 流したいBGMを指定 ///
-	/// <loopflag> ループをするかを指定 ///
-	/// <loopTime> 曲が流れて何秒立ったかの指定 ///
-	void SoundPlay(SOUNDNAME_BGM name, bool loopflag, float loopTime);
-
 	// 解放
-	void Release();						// 格納されているサウンドをすべて消す
-	void Release(SOUNDNAME_SE name);	// 特定のSEを消す
-	void Release(SOUNDNAME_BGM name);	// 特定のBGMを消す
+	void Release();
+	void Release(SOUNDNAME_SE name);
+	void Release(SOUNDNAME_BGM name);
 
 	// SEのユーザー音量調整を設定
-	void SetSEVolumeEntire(float UserSetVolume);
+	void SetSEVolumeUserSet(float UserSetVolume);
 
 	// SEのユーザー音量調整を渡す
-	float GetSEVolumeEntire();
+	int GetSEVolumeUserSet();
 
 	// BGMのユーザー音量調整を設定
-	void SetBGMVolumeEntire(float UserSetVolume);
+	void SetBGMVolumeUserSet(float UserSetVolume);
 
 	// BGMのユーザー音量調整を渡す
-	float GetBGMVolumeEntire();
+	int GetBGMVolumeUserSet();
 
-	void SetDefaultVolume(float defaultVol);
+	// SEのデフォルト音量を渡す
+	int GetDefaultSEVolume();
 
-	float GetDefaultVolume();
+	// BGMのデフォルト音量を渡す
+	int GetDefaultBGMVolume();
 
-	void SetVolume(float volume);
+private:
+	SoundProcess();
+	~SoundProcess();
 
-	float GetVolume();
+	// ボリューム関係
+	int volume_;									// ボリューム
+	int defaultSEVol_;								// デフォルトのSEのボリューム
+	int defaultBGMVol_ ;							// デフォルトのBGMのボリューム
 
-	const int seNum = 100;			// SEの数
-	const int bgmNum =100;			// BGMの数
-}
+	// SEの変数
+	std::array<int, seNum> se_sound;				// seを数だけ保存
+	std::array<bool, seNum> se_loadFlag;			// ロードのチェック
+	std::array<bool, seNum> se_playFlag;			// 再生チェック
+	float se_setUserVol_;							// SEのユーザー音量調整
+
+	// BGMの変数
+	std::array<int, bgmNum> bgm_sound;				// BGMを数だけ保存する
+	std::array<bool, seNum> bgm_loadFlag;			// ロードのチェック
+	std::array<bool, seNum> bgm_playFlag;			// 再生チェック
+	float bgm_seUserVol_;							// BGMのユーザー音量調整
+};

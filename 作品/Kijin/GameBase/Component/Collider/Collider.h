@@ -83,6 +83,25 @@ public:
 		isActive_ = flag;
 	}
 
+	/// <summary>
+	/// 押し出し処理を行うか？
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
+	bool IsBlock(void) const 
+	{
+		return isBlock_;
+	}
+
+	/// <summary>
+	/// 押し出しに関するフラグをセットする
+	/// </summary>
+	/// <param name="flag"></param>
+	void SetBlockFlag(const bool flag) 
+	{
+		isBlock_ = flag;
+	}
+
  #ifdef _DEBUG
 	virtual void DrawDebug(void) = 0;
 #endif
@@ -96,29 +115,29 @@ public:
 protected:
 
 	// カプセルとの判定用関数
-	static bool HitCheck(CapsuleCollider& a, CapsuleCollider& b);
-	static bool HitCheck(CapsuleCollider& a, SphereCollider& b);
-	static bool HitCheck(CapsuleCollider& a, MeshCollider& b);
-	static bool HitCheck(CapsuleCollider& a, CharactorCollider& b);
-	static bool HitCheck(CapsuleCollider& a, TerrainCollider& b);
+	bool HitCheck(CapsuleCollider& a, CapsuleCollider& b);
+	bool HitCheck(CapsuleCollider& a, SphereCollider& b);
+	bool HitCheck(CapsuleCollider& a, MeshCollider& b);
+	bool HitCheck(CapsuleCollider& a, CharactorCollider& b);
+	bool HitCheck(CapsuleCollider& a, TerrainCollider& b);
 
 	// 球体との判定用関数
-	static bool HitCheck(SphereCollider& a, SphereCollider& b);
-	static bool HitCheck(SphereCollider& a, MeshCollider& b);
-	static bool HitCheck(SphereCollider& a, CharactorCollider& b);
-	static bool HitCheck(SphereCollider& a, TerrainCollider& b);
+	bool HitCheck(SphereCollider& a, SphereCollider& b);
+	bool HitCheck(SphereCollider& a, MeshCollider& b);
+	bool HitCheck(SphereCollider& a, CharactorCollider& b);
+	bool HitCheck(SphereCollider& a, TerrainCollider& b, ObjectManager& objectmanager);
 
 	// メッシュとの判定用関数
-	static bool HitCheck(MeshCollider& a, MeshCollider& b);
-	static bool HitCheck(MeshCollider& a, CharactorCollider& b);
-	static bool HitCheck(MeshCollider& a, TerrainCollider& b);
+	bool HitCheck(MeshCollider& a, MeshCollider& b);
+	bool HitCheck(MeshCollider& a, CharactorCollider& b);
+	bool HitCheck(MeshCollider& a, TerrainCollider& b);
 
 	// キャラクターとの判定用関数
-	static bool HitCheck(CharactorCollider& a, CharactorCollider& b, ObjectManager& objectmanager);
-	static bool HitCheck(CharactorCollider& a, TerrainCollider& b, ObjectManager& objectmanager);
+	bool HitCheck(CharactorCollider& a, CharactorCollider& b, ObjectManager& objectmanager);
+	bool HitCheck(CharactorCollider& a, TerrainCollider& b, ObjectManager& objectmanager);
 
 	// 地形との判定用関数
-	static bool HitCheck(TerrainCollider& a, TerrainCollider& b);
+	bool HitCheck(TerrainCollider& a, TerrainCollider& b);
 
 	// 持ち主からのオフセット
 	Vector3 offset_;
@@ -128,6 +147,9 @@ protected:
 
 	// 判定が有効か？
 	bool isActive_{true};
+
+	// 押し出しが有効か?
+	bool isBlock_{ false };
 private:
 
 	// ヒット時に呼び出すfunction

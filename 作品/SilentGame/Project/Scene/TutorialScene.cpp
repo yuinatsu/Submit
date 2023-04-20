@@ -31,11 +31,7 @@ constexpr char padPS[]{ "./Resource/Input/PaddataPS.png" };
 
 
 TutorialScene::TutorialScene()
-{   
-	//mapNum_ = mapNum;
-    //Init();
-    //CreateMaskScreen();
-    //DrawOwnScreen(0.0);
+{
 }
 
 TutorialScene::~TutorialScene()
@@ -221,8 +217,6 @@ uniqueScene TutorialScene::UpdateGameEnd(float delta, uniqueScene ownScene)
 {
 	uiMng_->Update(delta, objMng_);
 
-	//gEvent_->StartAlert();
-
 	controller_->Update(delta);
 	DrawOwnScreen(delta);
 	objMng_->UpdateGameEnd(delta);
@@ -234,7 +228,6 @@ uniqueScene TutorialScene::UpdateGameEnd(float delta, uniqueScene ownScene)
 		// クリア時シーン移行
 		SoundProcess::SoundStop(SoundProcess::SOUNDNAME_SE::waring);
 		SoundProcess::SoundStop(SoundProcess::SOUNDNAME_SE::walk);
-		//return std::make_unique<ClearScene>(mapNum_);
 		return std::make_unique<CircleScene>(
 			2.0,
 			std::move(ownScene),
@@ -269,9 +262,6 @@ void TutorialScene::DrawGame(float delta)
 	SetDrawScreen(screenID_);
 	ClsDrawScreen();
 	DrawGraph(50, 60, viewID_, true);
-
-	//DrawGraph(0, 0, lpImageMng.GetID("fog")[0], true);
-	//DrawGraph(0, 0, lpImageMng.GetID("fogBG")[0], true);
 	if (startedFlag_)
 	{
 		// 座標をセット(プレイヤーのオフセット含めた座標)
@@ -351,14 +341,12 @@ void TutorialScene::DrawMap(void)
 	{
 		for (int x = 0; x < worldArea.x; x++)
 		{
-			//auto image = y * worldArea.x + x;
 			// グラフィックidの取得
 			int gid = tmxObj_->GetMapData("2Block", x, y) - tmxObj_->GetFirstGID();
 			if (gid >= 0)
 			{
 				Math::Vector2 drawPos{ static_cast<float>(x) * tileSize.x , static_cast<float>(y) * tileSize.y };
 				drawPos += drawOffset;
-				//drawMng_->Draw(drawPos, (tileSize / 2), lpImageMng.GetID(map_)[gid]);
 				drawMng_->Draw(drawPos, lpImageMng.GetID(map_)[gid]);
 			}
 		}

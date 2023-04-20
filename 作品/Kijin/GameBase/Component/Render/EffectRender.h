@@ -92,6 +92,9 @@ public:
 	
 	bool IsEnd(void);
 
+	void Play(void);
+
+	void Stop(void);
 protected:
 	// エフェクトのハンドル
 	SharedEffectHandle handle_;
@@ -106,8 +109,9 @@ private:
 	void Update(BaseScene& scene, ObjectManager& objectManager, float delta, Controller& controller) final;
 
 	// エフェクトのDraw処理
-	void Draw(void) final;
-	void Draw(int shadowMap, int buff) final{}
+	void Draw(int shadowMap = -1, int buff = -1) final{}
+
+	void SetUpDepthTex(int ps = -1, int buff = -1) final{}
 	
 	// エフェクトに対する終了リクエスト
 	//bool EffectEndRequest(EffectInfo* info);
@@ -116,18 +120,19 @@ private:
 	//EffectInfo* EffectCreate(EffectIndex index_);
 	//
 	// エフェクトの削除
-	void EffectDeleate(void);
+	//void EffectDeleate(void);
 
-	// 全エフェクトの削除
-	void EffectDeleateAll(void);
+	//// 全エフェクトの削除
+	//void EffectDeleateAll(void);
 
-	// 全エフェクトの状態遷移
-	void EffectStepAll(float stepTime);
+	//// 全エフェクトの状態遷移
+	//void EffectStepAll(float stepTime);
 
 	void UpdateEffekseer(void);
 
-	void LoadEffect(void);
+	//void LoadEffect(void);
 
+	void End(ObjectManager& objectManager) final;
 
 	//static EffectFunction_ functionTable[EffectMax] = {};
 	/*

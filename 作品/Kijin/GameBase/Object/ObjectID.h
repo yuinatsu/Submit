@@ -5,13 +5,14 @@ class ObjectID
 {
 public:
 	ObjectID();
-	ObjectID(const std::string& idseed);
+	ObjectID(long long seed);
 	ObjectID(const ObjectID& objID);
+	ObjectID(const size_t& val);
 	ObjectID& operator=(const ObjectID& objID);
 	bool operator ==(const ObjectID& objID);
 	const size_t operator*()const;
 private:
 	size_t id_;
-	static std::hash<std::string> hash_;
+	static std::hash<long long> hash_;
 };
 

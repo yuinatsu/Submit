@@ -119,7 +119,6 @@ uniqueScene PauseScene::Update(float delta, uniqueScene ownScene)
 	controller_->Update(delta);
 	time_ += delta;
 	DrawOwnScreen(delta);
-	//return (this->*updata_)(delta, std::move(ownScene));
 	return (this->*updateFunc_)(delta, std::move(ownScene));
 }
 

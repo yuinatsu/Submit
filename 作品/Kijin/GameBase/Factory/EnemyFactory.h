@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include "../Common/Vector3.h"
+#include "../Common/SharedHandle.h"
 
 // 敵を生成するクラス
 class EnemyFactory :
@@ -13,7 +14,6 @@ public:
 private:
 	ObjectID Create(ObjectID ownerID, const Vector3& pos, const Vector3& rot = { 0.0f,0.0f,0.0f }) final;
 	const FactoryID GetID(void) const { return FactoryID::Enemy; }
-	void LoadTransform(std::ifstream& file);
 	void LoadTrans(std::ifstream& file, std::uint32_t size) final;
 	void LoadModel(std::ifstream& file, std::uint32_t size) final;
 	void LoadCollider(std::ifstream& file, std::uint32_t size) final;
@@ -28,6 +28,9 @@ private:
 	// モデルのパス
 	std::string modelPath_;
 
+	// あらかじめ読み込んでおくために使う
+	SharedModelHandle preLoadHandle_;
+
 	// 当たり判定の中央
 	Vector3 colCeter_;
 
@@ -37,11 +40,15 @@ private:
 	// 当たり判定の半径
 	float radius_;
 
+	// 各パラメータ
 	float hitTime_;
 	float searchDist_;
 	float speed_;
 	float stopDist_;
 
+	float shotInterval_;
+	float burstInterval_;
+	float burstNum_;
 
 	// ステージのID
 	ObjectID stageID_;

@@ -39,8 +39,6 @@ GameScene::~GameScene()
 
 void GameScene::SoundPlay(void)
 {
-	//SoundProcess::SoundStop(SoundProcess::SOUNDNAME_BGM::alarm);
-	//SoundProcess::SoundStop(SoundProcess::SOUNDNAME_BGM::stage);
 	if (gEvent_->GetNowEventType() == EventType::Non)
 	{
 		SoundProcess::SoundPlay(SoundProcess::SOUNDNAME_BGM::stage, true, loopTime_);
@@ -105,10 +103,6 @@ bool GameScene::InitScreen(void)
 	
 	// 描画を管理するクラスを作成
 	drawMng_ = std::make_unique<DrawMng>(static_cast<float>(worldArea.y * tileSize.y));
-
-
-	
-	
 
 	return true;
 }
@@ -247,8 +241,6 @@ uniqueScene GameScene::UpdateGameEnd(float delta, uniqueScene ownScene)
 {
 	uiMng_->Update(delta, objMng_);
 
-	//gEvent_->StartAlert();
-
 	controller_->Update(delta);
 	DrawOwnScreen(delta);
 	objMng_->UpdateGameEnd(delta);
@@ -269,7 +261,6 @@ uniqueScene GameScene::UpdateGameEnd(float delta, uniqueScene ownScene)
 				dynamic_cast<Clock&>(*c).RestartAlarm();
 			}
 		}
-		//return std::make_unique<ClearScene>(mapNum_);
 		Relese();
 		return std::make_unique<ClearTrans>(objMng_, *drawMng_, camera_, tmxObj_, gEvent_, std::move(ownScene), std::make_unique<ResultScene>(*resultData_, mapNum_, isSmallMap_, delta));
 	}
@@ -303,20 +294,13 @@ void GameScene::DrawGame(float delta)
 	objMng_->Draw(camera_.GetOffset(), *drawMng_);
 	drawMng_->Draw();
 
-	
-	// MyDrawGraph(0, 0, lpImageMng.GetID("fog")[0]);
-
 	SetDrawScreen(screenID_);
 	ClsDrawScreen();
 
-
-	// DrawGraph(0, 0, lpImageMng.GetID("fogBG")[0], true);
 	if (startedFlag_)
 	{
 		// 座標をセット(プレイヤーのオフセット含めた座標)
 		screenEffect_.pos= objMng_->GetPlayer().lock()->GetPos() + camera_.GetOffset() + Math::Vector2{ 50.0f,60.0f };
-
-		
 
 		// アラート時の値セット
 		screenEffect_.redValue = gEvent_->Color();
@@ -346,7 +330,6 @@ void GameScene::DrawGame(float delta)
 			50 + camera_.GetViewSize().x, 60 + camera_.GetViewSize().y,
 			50, 60 + camera_.GetViewSize().y,
 			lpImageMng.GetID("fog")[0], true);
-		//DrawGraph(370, 100, lpImageMng.GetID("./Resource/Image/GameScene/clear.png")[0], true);
 		DrawRotaGraph(lpSceneMng.GetScreenSize().x/2, 120, 1.0, 0.0, lpImageMng.GetID("./Resource/Image/GameScene/clear.png")[0], true);
 	}
 	gEvent_->MainDraw();
@@ -380,7 +363,6 @@ void GameScene::DrawMap(void)
 	{
 		for (int x = 0; x < worldArea.x; x++)
 		{
-			//auto image = y * worldArea.x + x;
 			// グラフィックidの取得
 			int gid = tmxObj_->GetMapData("2Block", x, y) - tmxObj_->GetFirstGID();
 			if (gid >= 0)
@@ -395,7 +377,6 @@ void GameScene::DrawMap(void)
 
 void GameScene::Loaded(void)
 {
-
 	camera_.Loaded();
 	SetDrawScreen(mapFloor_);
 	ClsDrawScreen();

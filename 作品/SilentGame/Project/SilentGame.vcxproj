@@ -341,7 +341,6 @@
     <ClInclude Include="common\rapidxml_print.hpp" />
     <ClInclude Include="common\rapidxml_utils.hpp" />
     <ClInclude Include="Object\UI\UiBase.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="Resource\Tmx\TmxObj.h" />
     <ClInclude Include="Scene\BaseScene.h" />
     <ClInclude Include="common\Debug.h" />

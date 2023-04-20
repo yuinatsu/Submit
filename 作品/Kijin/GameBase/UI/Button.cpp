@@ -1,21 +1,23 @@
 #include "Button.h"
 #include <DxLib.h>
 #include "../Common/ResourceMng.h"
-#include "../Application.h"
+#include "../SceneManager.h"
+#include "../Common/Debug.h"
 
-Button::Button(PushFunc&& pushFunc, const std::filesystem::path& btnPath, const std::filesystem::path& hitCursorPath, const Vector2& pos) :
+Button::Button(const PushFunc& pushFunc, const std::filesystem::path& btnPath, const std::filesystem::path& hitCursorPath, const Vector2& pos) :
 	ButtonBase{pos}, pushFunc_{pushFunc}
 {
 	draw_ = &Button::DrawNotHitCursor;
-	lpResourceMng.LoadTexture(btnHandle_, btnPath);
-	lpResourceMng.LoadTexture(hitCursorHandle_, hitCursorPath);
+	lpSceneMng.GetResourceMng().LoadTexture(btnHandle_, btnPath);
+	lpSceneMng.GetResourceMng().LoadTexture(hitCursorHandle_, hitCursorPath);
+	pos_ = pos;
 }
 
-void Button::Update(float delta, ObjectManager& objMng, Controller& controller)
+void Button::Update(float delta, BaseScene& scene, ObjectManager& objMng, Controller& controller)
 {
 }
 
-void Button::Draw()
+void Button::Draw(int mainScr)
 {
 	(this->*draw_)();
 }
@@ -37,7 +39,7 @@ void Button::NotHitCursor(void)
 	isHitCursor_ = false;
 }
 
-void Button::Loaded(void)
+void Button::Loaded(BaseScene& scene)
 {
 	GetGraphSizeF(*btnHandle_, &size_.x, &size_.y);
 	pos_ -= size_ / 2.0f;
@@ -45,11 +47,12 @@ void Button::Loaded(void)
 
 void Button::DrawHitCursor(void)
 {
-	DrawGraph(static_cast<int>(pos_.x), static_cast<int>(pos_.y), *btnHandle_, true);
-	DrawGraph(static_cast<int>(pos_.x), static_cast<int>(pos_.y), *hitCursorHandle_, true);}
+	DrawGraphF(pos_.x, pos_.y, *btnHandle_, true);
+	DrawGraphF(pos_.x, pos_.y, *hitCursorHandle_, true);
+}
 
 
 void Button::DrawNotHitCursor(void)
 {
-	DrawGraph(static_cast<int>(pos_.x), static_cast<int>(pos_.y), *btnHandle_, true);
+	DrawGraphF(pos_.x, pos_.y, *btnHandle_, true);
 }

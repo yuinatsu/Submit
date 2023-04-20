@@ -36,7 +36,6 @@ void Door::Draw(const Math::Vector2& offset, DrawMng& drawMng)
 {
 	auto& anim = dynamic_cast<Animation&>(GetComponent(ComponentID::Animator));
 	anim.Draw(drawMng, pos_ + offset, false);
-	//GetComponent(ComponentID::Collider).DbgDraw(offset);
 }
 
 void Door::Update(float dleta)

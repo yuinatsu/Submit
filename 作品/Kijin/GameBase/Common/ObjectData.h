@@ -1,5 +1,6 @@
 #pragma once
 
+// データの種類
 enum class DataType
 {
 	Transform,			// 座標回転拡縮データ
@@ -10,23 +11,26 @@ enum class DataType
 	Other				// そのほかのパラメータ用
 };
 
+// データファイルのヘッダー
 struct ObjectDataHeader
 {
-	char sig[4];
-	unsigned int check;
-	unsigned int version;
+	char sig[4];			// シグネチャ
+	unsigned int check;		// チェック用
+	unsigned int version;	// バージョン情報
 };
 
+// データ部のヘッダー
 struct DataHeader
 {
-	DataType type;
-	std::uint32_t size;
+	DataType type;			// タイプ
+	std::uint32_t size;		// データサイズ
 };
 
+// 当たり判定データの種類
 enum class ColDataType
 {
 	Box,
 	Capsule,
 	Sphere,
-	Mesh
+	Mesh,
 };

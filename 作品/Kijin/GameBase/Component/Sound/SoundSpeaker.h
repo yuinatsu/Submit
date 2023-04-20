@@ -1,6 +1,9 @@
 #pragma once
 #include "../ComponentBase.h"
 #include "../../Common/SharedHandle.h"
+#include <deque>
+#include "../Transform/Transform.h"
+#include "../ComponentHandle.h"
 
 
 class SoundSpeaker :
@@ -16,6 +19,6 @@ public:
 	}
 	SetID(ComponentID::Base, ComponentID::SoundSpeaker)
 private:
-
+	ComponentHandle<Transform> transform_;
 };
 

@@ -11,39 +11,30 @@ class Player :
     public Unit
 {
 public:
-    /// <summary> コンストラクタ </summary>
-    /// <param name="cntType"> コントローラ情報 </param>
-    /// <param name="tmx"> TmxObjクラス </param>
-    /// <param name="pos"> 初期座標 </param>
+    //　コンストラクタ　
     Player(CntType cntType, std::shared_ptr<TmxObj> tmx, Math::Vector2 pos);
     ~Player();
 
 private:
-    /// <summary> 初期化 </summary>
-    /// <param name="cntType"> コントローラーの種類 </param>
-    /// <returns> 正常動作:true </returns>
+    //　初期化　
     bool Init(CntType cntType);
     
-    /// <summary> 更新 </summary>
-    /// <param name="delta"> デルタタイム </param>
+    //　更新　
     void Update(float delta)override;
 
-    /// <summary> 描画 </summary>
-    /// <param name="offset"> オフセット </param>
-    /// <param name="drawMng"> 描画Manager </param>
+    //　描画　
     void Draw(const Math::Vector2& offset, DrawMng& drawMng)override;
 
-    /// <summary> ID取得 </summary>
-    /// <returns> ObjID::Player </returns>
+    //　ID取得　
     ObjID GetObjID(void) override { return ObjID::Player; };
 
-    /// <summary> プレイヤーアクション </summary>
+    //　プレイヤーアクション　
     std::vector<char> stateVec_;
     rapidxml::xml_document<> stateDoc_;
     rapidxml::xml_node<>* stateNode_;
     std::unique_ptr<animNode> animNode_;
 
-    /// <summary> コントローラ情報 </summary>
+    //　コントローラ情報　
     std::unique_ptr<Controller> controller_;
 
     // フレンド

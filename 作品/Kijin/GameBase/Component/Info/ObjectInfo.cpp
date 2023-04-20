@@ -13,6 +13,8 @@ void ObjectInfo::Begin(ObjectManager& objectManager)
 void ObjectInfo::End(ObjectManager& objectManager)
 {
 	isActive_ = false;
+	useFactory_ = false;
+	attribute_ = ObjectAttribute::Other;
 }
 
 const bool ObjectInfo::IsActive(void) const

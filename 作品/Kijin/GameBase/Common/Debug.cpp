@@ -64,6 +64,7 @@ void DebugClass::DebugDraw(void)
 #endif
 	if (infoDrawFlag_)
 	{
+		// 情報を表示するとき
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
 		DrawBox(0, 0, scW, scH, 0x000000, true);
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
@@ -83,6 +84,7 @@ void DebugClass::DebugDraw(void)
 	
 	if (stopFlag_)
 	{
+		// ストップすべき時
 		WaitKey();
 		stopFlag_ = false;
 	}

@@ -6,32 +6,26 @@ class DeadTrans :
     public TransitionScene
 {
 public:
-    /// <summary> コンストラクタ </summary>
-    /// <param name="objMng"> ObjクラスのManager </param>
-    /// <param name="offset"> オフセット </param>
-    /// <param name="drawMng"> 描画Manager </param>
-    /// <param name="beforScene"> 前シーン </param>
-    /// <param name="afterScene"> 後シーン </param>
+    // コンストラクタ 
     DeadTrans(std::shared_ptr<ObjManager> objMng, Math::Vector2 offset, DrawMng& drawMng, Camera& camera, uniqueScene beforScene, uniqueScene afterScene);
     ~DeadTrans();
 private:
-    /// <summary> トランジション更新 </summary>
-    /// <param name="delta"> デルタタイム </param>
-    /// <returns> トランジション完了:true </returns>
+    // トランジション更新 
     bool UpdataTransition(double delta);
 
-    /// <summary> トランジション描画 </summary>
-    /// <param name="delta"> デルタタイム </param>
+    // トランジション描画 
     void DrawOwnScreen(float delta) override;
 
-    /// <summary> 最大時間 </summary>
+    // 最大時間 
     double limitTime_;
 
-    /// <summary> 描画Manager </summary>
+    // 描画Manager 
     DrawMng& drawmng_;
 
-    int viewID_;
-
+    // カメラ情報
     Camera& camera_;
+
+    // ゲームシーンの最後のスクリーン情報
+    int viewID_;
 };
 

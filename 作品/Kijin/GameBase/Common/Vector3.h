@@ -154,7 +154,10 @@ inline Vector3Tmp<T>& Vector3Tmp<T>::operator+=(const T& val)
 template<ValueC T>
 inline Vector3Tmp<T>& Vector3Tmp<T>::operator-=(const Vector3Tmp<T>& vec)
 {
-	return { x - vec.x, y - vec.y, z - vec.z };
+	x -= vec.x;
+	y -= vec.y;
+	z -= vec.z;
+	return *this;
 }
 
 template<ValueC T>

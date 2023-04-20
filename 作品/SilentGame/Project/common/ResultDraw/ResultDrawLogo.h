@@ -1,6 +1,7 @@
 #pragma once
 #include "ResultDraw.h"
 #include "../ShaderID.h"
+#include <memory>
 
 template<class T>
 class ConstantBuffer;

@@ -1,30 +1,39 @@
 #pragma once
 #include "Behavior.h"
+#include <map>
+#include "../../Common/Vector2.h"
 
 class StageBehavior :
 	public Behavior
 {
 public:
+	StageBehavior(std::map<size_t, Vector2>&& posList);
 	StageBehavior();
 
 	/// <summary>
 	/// 敵の数のカウントを減らす
 	/// </summary>
 	/// <param name=""></param>
-	void SubEnemy(void);
+	void SubEnemy(ObjectID& id);
 
 	/// <summary>
-	/// 敵の数をセット
+	/// 敵の座標のリストを取得する
 	/// </summary>
-	/// <param name="count"></param>
-	void SetEnemyCount(unsigned int count)
-	{
-		enemyCount_ = count;
-	}
+	/// <param name=""></param>
+	/// <returns></returns>
+	const std::map<size_t, Vector2>& GetEnemyPosList(void) const&;
 private:
-	void Update(BaseScene& scene, ObjectManager& objectManager, float delta, Controller& controller) final;
+	void Update(BaseScene& scene, ObjectManager& objectManager, float delta, Controller& controller) override;
 
-	// 敵の数
-	unsigned int enemyCount_;
+protected:
+
+	/// <summary>
+	/// 敵の座標リストを更新する
+	/// </summary>
+	/// <param name="objectManager"></param>
+	void UpdateEnemyPosList(ObjectManager& objectManager);
+
+	// 敵の座標のリスト
+	std::map<size_t, Vector2> enemyPosList_;
 };
 

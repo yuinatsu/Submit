@@ -1,6 +1,8 @@
 #pragma once
+#include <map>
 #include <memory>
 #include <functional>
+#include <span>
 #include "Math.h"
 #include "ScreenID.h"
 
@@ -51,7 +53,6 @@ protected:
 
 	// ハンドルを管理するためのshared_ptr
 	std::shared_ptr<int> ptr_;
-
 };
 
 // グラフィック用
@@ -64,6 +65,35 @@ public:
 	SharedGraphicHandle(const SharedGraphicHandle& sharedHandle) noexcept;
 	~SharedGraphicHandle();
 	SharedGraphicHandle& operator=(const SharedGraphicHandle& sharedHandle) noexcept;
+};
+
+// 分割グラフィック用
+class SharedDivGraphicHandle :
+	public SharedHandle
+{
+public:
+	SharedDivGraphicHandle() {}
+	explicit SharedDivGraphicHandle(const int handle);
+	SharedDivGraphicHandle(const SharedDivGraphicHandle& sharedHandle) noexcept;
+	~SharedDivGraphicHandle();
+	SharedDivGraphicHandle& operator=(const SharedDivGraphicHandle& sharedHandle) noexcept;
+
+
+	/// <summary>
+	/// 指定のインデックスの中のハンドルにアクセスする
+	/// </summary>
+	/// <param name="idx"> インデックス </param>
+	/// <returns> ハンドル </returns>
+	const int  operator[](size_t idx) const;
+
+	/// <summary>
+	/// 参照するspanをセットする
+	/// </summary>
+	/// <param name="handles"> 参照元のspan </param>
+	void Set(const std::span<int> handles);
+private:
+	// spanで参照できるように持つ
+	std::span<int> handles_;
 };
 
 // スクリーン用

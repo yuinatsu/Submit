@@ -130,17 +130,16 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>fxc.exe /T ps_5_0 /E "main" /O3  /Fo Resource/resource/Shader/Pixel/Tex.pso Shader/Pixel/Tex.hlsl
-fxc.exe /T vs_5_0 /E "main" /O3  /Fo Resource/resource/Shader/Vertex/Mesh.vso Shader/Vertex/Mesh.hlsl
-fxc.exe /T vs_5_0 /E "main" /O3  /Fo Resource/resource/Shader/Vertex/Mesh4.vso Shader/Vertex/Mesh4.hlsl
-
-fxc.exe /T ps_5_0 /E "main" /O3  /Fo Resource/resource/Shader/ShadowMap/ShadowMap.pso Shader/ShadowMap/ShadowMapPS.hlsl
-fxc.exe /T vs_5_0 /E "main" /O3  /Fo Resource/resource/Shader/ShadowMap/Mesh.vso Shader/ShadowMap/Mesh1Shadow.hlsl
-fxc.exe /T vs_5_0 /E "main" /O3  /Fo Resource/resource/Shader/ShadowMap/Mesh4.vso Shader/ShadowMap/Mesh4Shadow.hlsl
-
-fxc.exe /T ps_5_0 /E "main" /O3  /Fo Resource/resource/Shader/PostEffect/mono.pso Shader/PostEffect/mono.hlsl
-fxc.exe /T ps_5_0 /E "main" /O3  /Fo Resource/resource/Shader/PostEffect/aveblur.pso Shader/PostEffect/AverageBlur.hlsl</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
+    <FxCompile>
+      <EntryPointName />
+    </FxCompile>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+      <ObjectFileOutput>Resource/resource/Shader/</ObjectFileOutput>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -160,11 +159,63 @@ fxc.exe /T ps_5_0 /E "main" /O3  /Fo Resource/resource/Shader/PostEffect/aveblur
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>fxc.exe /T ps_5_0 /E "main" /O3  /Fo Shader/Pixel/Tex.pso Shader/Pixel/Tex.hlsl
-fxc.exe /T vs_5_0 /E "main" /O3  /Fo Shader/Vertex/Mesh4.vso Shader/Vertex/Mesh4.hlsl</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
+    <FxCompile>
+      <EntryPointName />
+    </FxCompile>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+      <ObjectFileOutput>Resource/resource/Shader/</ObjectFileOutput>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Component\Behavior\CameraBehavior.cpp" />
+    <ClCompile Include="Component\Render\LineRender.cpp" />
+    <ClCompile Include="Component\Behavior\EnemyLaserSightBehavior.cpp" />
+    <ClCompile Include="Component\Behavior\EnemyAttackBehavior.cpp" />
+    <ClCompile Include="Factory\EnemyAttackFactory.cpp" />
+    <ClCompile Include="Factory\SandSmokeEffect.cpp" />
+    <ClCompile Include="Component\Behavior\SandSmokeBehavior.cpp" />
+    <ClCompile Include="Factory\SandSmokeDiffusionEffect.cpp" />
+    <ClCompile Include="Component\Behavior\SandSmokeDiffusionBehavior.cpp" />
+    <ClCompile Include="Factory\MuzzleFlashEffect.cpp" />
+    <ClCompile Include="Factory\SandSmokeSlowMoveEffect.cpp" />
+    <ClCompile Include="Component\Behavior\SandSmokeSlowMoveBehavior.cpp" />
+    <ClCompile Include="Scene\Transition\BackLoading.cpp" />
+    <ClCompile Include="Component\Behavior\BeemEffectBehavior.cpp" />
+    <ClCompile Include="Factory\BlasterEffect.cpp" />
+    <ClCompile Include="Factory\BeemEffect.cpp" />
+    <ClCompile Include="Component\Render\BillboardRender.cpp" />
+    <ClCompile Include="Component\Behavior\PlayerSkillBehavior.cpp" />
+    <ClCompile Include="Factory\PlayerSkillFactory.cpp" />
+    <ClCompile Include="Factory\FireExEffect.cpp" />
+    <ClCompile Include="Factory\HorizontalEffect.cpp" />
+    <ClCompile Include="Factory\RedExEffect.cpp" />
+    <ClCompile Include="Factory\HitEffect.cpp" />
+    <ClCompile Include="Common\Quaternion.cpp" />
+    <ClCompile Include="Scene\Transition\FadeLoading.cpp" />
+    <ClCompile Include="Scene\DialogScene.cpp" />
+    <ClCompile Include="Component\Behavior\TutorialBehavior.cpp" />
+    <ClCompile Include="Shader\PEBase.cpp" />
+    <ClCompile Include="Shader\PEManager.cpp" />
+    <ClCompile Include="Factory\ThrustEffect.cpp" />
+    <ClCompile Include="Component\Behavior\ThrusterBehavior.cpp" />
+    <ClCompile Include="Shader\PEType\AveblurPE.cpp" />
+    <ClCompile Include="Shader\PEType\ColortoMono.cpp" />
+    <ClCompile Include="Shader\PEType\DofPE.cpp" />
+    <ClCompile Include="Shader\PEType\GaussPE.cpp" />
+    <ClCompile Include="Shader\PEType\MonoPE.cpp" />
+    <ClCompile Include="Shader\PEType\NoPE.cpp" />
+    <ClCompile Include="Shader\PEType\VolfogPE.cpp" />
+    <ClCompile Include="Component\Behavior\SkyBehavior.cpp" />
+    <ClCompile Include="Shader\ShrinkBuff.cpp" />
+    <ClCompile Include="UI\MiniMap.cpp" />
+    <ClCompile Include="UI\SwitchButton.cpp" />
+    <ClCompile Include="UI\TutorialMessage.cpp" />
+    <ClCompile Include="UI\InputSetButton.cpp" />
+    <ClCompile Include="Scene\InputSetScene.cpp" />
     <ClCompile Include="UI\Slider.cpp" />
     <ClCompile Include="UI\Button.cpp" />
     <ClCompile Include="UI\Image.cpp" />
@@ -185,7 +236,7 @@ fxc.exe /T vs_5_0 /E "main" /O3  /Fo Shader/Vertex/Mesh4.vso Shader/Vertex/Mesh4
     <ClCompile Include="Common\Camera.cpp" />
     <ClCompile Include="Component\Collider\Collider.cpp" />
     <ClCompile Include="Component\Animator\Animator.cpp" />
-    <ClCompile Include="Application.cpp" />
+    <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="Common\Debug.cpp" />
     <ClCompile Include="Common\Math.cpp" />
     <ClCompile Include="Common\Random.cpp" />
@@ -201,7 +252,6 @@ fxc.exe /T vs_5_0 /E "main" /O3  /Fo Shader/Vertex/Mesh4.vso Shader/Vertex/Mesh4
     <ClCompile Include="Factory\EnemyBullet.cpp" />
     <ClCompile Include="Factory\EnemyFactory.cpp" />
     <ClCompile Include="Factory\Factory.cpp" />
-    <ClCompile Include="Component\Navi\Navi.cpp" />
     <ClCompile Include="Component\Render\NonLightingRender.cpp" />
     <ClCompile Include="Component\Collider\MeshCollider.cpp" />
     <ClCompile Include="Object\ObjectID.cpp" />
@@ -213,17 +263,14 @@ fxc.exe /T vs_5_0 /E "main" /O3  /Fo Shader/Vertex/Mesh4.vso Shader/Vertex/Mesh4
     <ClCompile Include="Scene\PauseScene.cpp" />
     <ClCompile Include="Scene\ResultScene.cpp" />
     <ClCompile Include="Scene\Transition\Loading.cpp" />
-    <ClCompile Include="Scene\Transition\Fade.cpp" />
     <ClCompile Include="Scene\GameScene.cpp" />
     <ClCompile Include="Scene\BaseScene.cpp" />
     <ClCompile Include="Component\ComponentBase.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Component\Behavior\Behavior.cpp" />
     <ClCompile Include="Scene\TitleScene.cpp" />
-    <ClCompile Include="Scene\Transition\Transition.cpp" />
     <ClCompile Include="Common\SharedHandle.cpp" />
     <ClCompile Include="Component\Transform\Transform.cpp" />
-    <ClCompile Include="Component\Sound\SoundSpeaker.cpp" />
     <ClCompile Include="Component\Collider\SphereCollider.cpp" />
     <ClCompile Include="Factory\StageFactory.cpp" />
     <ClCompile Include="Factory\SkyFactory.cpp" />
@@ -236,9 +283,58 @@ fxc.exe /T vs_5_0 /E "main" /O3  /Fo Shader/Vertex/Mesh4.vso Shader/Vertex/Mesh4
     <ClCompile Include="UI\UiBase.cpp" />
     <ClCompile Include="UI\UiManager.cpp" />
     <ClCompile Include="Common\Worker.cpp" />
+    <ClCompile Include="Scene\WindowScene.cpp" />
+    <ClCompile Include="Factory\VerticalEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Component\Behavior\CameraBehavior.h" />
+    <ClInclude Include="Component\Render\LineRender.h" />
+    <ClInclude Include="Component\Behavior\EnemyLaserSightBehavior.h" />
+    <ClInclude Include="Component\Behavior\EnemyAttackBehavior.h" />
+    <ClInclude Include="Factory\EnemyAttackFactory.h" />
+    <ClInclude Include="Factory\SandSmokeEffect.h" />
+    <ClInclude Include="Component\Behavior\SandSmokeBehavior.h" />
+    <ClInclude Include="Factory\SandSmokeDiffusionEffect.h" />
+    <ClInclude Include="Component\Behavior\SandSmokeDiffusionBehavior.h" />
+    <ClInclude Include="Factory\MuzzleFlashEffect.h" />
+    <ClInclude Include="Factory\SandSmokeSlowMoveEffect.h" />
+    <ClInclude Include="Component\Behavior\SandSmokeSlowMoveBehavior.h" />
+    <ClInclude Include="Scene\StageID.h" />
+    <ClInclude Include="Scene\Transition\BackLoading.h" />
+    <ClInclude Include="Component\Behavior\BeemEffectBehavior.h" />
+    <ClInclude Include="Factory\BlasterEffect.h" />
+    <ClInclude Include="Factory\BeemEffect.h" />
+    <ClInclude Include="Component\Render\BillboardRender.h" />
     <ClInclude Include="Component\Animator\PlayerAnimIndex.h" />
+    <ClInclude Include="Component\Behavior\PlayerSkillBehavior.h" />
+    <ClInclude Include="Factory\PlayerSkillFactory.h" />
+    <ClInclude Include="Factory\FireExEffect.h" />
+    <ClInclude Include="Factory\HorizontalEffect.h" />
+    <ClInclude Include="Factory\RedExEffect.h" />
+    <ClInclude Include="Factory\HitEffect.h" />
+    <ClInclude Include="Common\Quaternion.h" />
+    <ClInclude Include="Scene\Transition\FadeLoading.h" />
+    <ClInclude Include="Scene\DialogScene.h" />
+    <ClInclude Include="Component\Behavior\TutorialBehavior.h" />
+    <ClInclude Include="Shader\PEBase.h" />
+    <ClInclude Include="Shader\PEID.h" />
+    <ClInclude Include="Shader\PEManager.h" />
+    <ClInclude Include="Factory\ThrustEffect.h" />
+    <ClInclude Include="Component\Behavior\ThrusterBehavior.h" />
+    <ClInclude Include="Shader\PEType\AveblurPE.h" />
+    <ClInclude Include="Shader\PEType\ColortoMono.h" />
+    <ClInclude Include="Shader\PEType\DofPE.h" />
+    <ClInclude Include="Shader\PEType\GaussPE.h" />
+    <ClInclude Include="Shader\PEType\MonoPE.h" />
+    <ClInclude Include="Shader\PEType\NoPE.h" />
+    <ClInclude Include="Shader\PEType\VolfogPE.h" />
+    <ClInclude Include="Component\Behavior\SkyBehavior.h" />
+    <ClInclude Include="Shader\ShrinkBuff.h" />
+    <ClInclude Include="UI\MiniMap.h" />
+    <ClInclude Include="UI\SwitchButton.h" />
+    <ClInclude Include="UI\TutorialMessage.h" />
+    <ClInclude Include="UI\InputSetButton.h" />
+    <ClInclude Include="Scene\InputSetScene.h" />
     <ClInclude Include="UI\Slider.h" />
     <ClInclude Include="UI\Button.h" />
     <ClInclude Include="UI\Image.h" />
@@ -267,7 +363,7 @@ fxc.exe /T vs_5_0 /E "main" /O3  /Fo Shader/Vertex/Mesh4.vso Shader/Vertex/Mesh4
     <ClInclude Include="Common\Camera.h" />
     <ClInclude Include="Component\Collider\Collider.h" />
     <ClInclude Include="Component\Animator\Animator.h" />
-    <ClInclude Include="Application.h" />
+    <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Common\Debug.h" />
     <ClInclude Include="Common\Math.h" />
     <ClInclude Include="Common\MathConcepts.h" />
@@ -290,7 +386,6 @@ fxc.exe /T vs_5_0 /E "main" /O3  /Fo Shader/Vertex/Mesh4.vso Shader/Vertex/Mesh4
     <ClInclude Include="Factory\EnemyFactory.h" />
     <ClInclude Include="Factory\Factory.h" />
     <ClInclude Include="Factory\FactoryID.h" />
-    <ClInclude Include="Component\Navi\Navi.h" />
     <ClInclude Include="Component\Render\NonLightingRender.h" />
     <ClInclude Include="Component\Collider\MeshCollider.h" />
     <ClInclude Include="Object\ObjectID.h" />
@@ -303,18 +398,14 @@ fxc.exe /T vs_5_0 /E "main" /O3  /Fo Shader/Vertex/Mesh4.vso Shader/Vertex/Mesh4
     <ClInclude Include="Scene\PauseScene.h" />
     <ClInclude Include="Scene\ResultScene.h" />
     <ClInclude Include="Scene\Transition\Loading.h" />
-    <ClInclude Include="Scene\Transition\Fade.h" />
     <ClInclude Include="Scene\GameScene.h" />
     <ClInclude Include="Scene\BaseScene.h" />
     <ClInclude Include="Component\ComponentBase.h" />
     <ClInclude Include="Component\Behavior\Behavior.h" />
     <ClInclude Include="Scene\SceneID.h" />
     <ClInclude Include="Scene\TitleScene.h" />
-    <ClInclude Include="Scene\Transition\Transition.h" />
-    <ClInclude Include="Scene\Transition\TransitionType.h" />
     <ClInclude Include="Common\SharedHandle.h" />
     <ClInclude Include="Component\Transform\Transform.h" />
-    <ClInclude Include="Component\Sound\SoundSpeaker.h" />
     <ClInclude Include="Component\Collider\SphereCollider.h" />
     <ClInclude Include="Factory\StageFactory.h" />
     <ClInclude Include="Factory\SkyFactory.h" />
@@ -328,9 +419,221 @@ fxc.exe /T vs_5_0 /E "main" /O3  /Fo Shader/Vertex/Mesh4.vso Shader/Vertex/Mesh4
     <ClInclude Include="UI\UiID.h" />
     <ClInclude Include="UI\UiManager.h" />
     <ClInclude Include="Common\Worker.h" />
+    <ClInclude Include="Scene\WindowScene.h" />
+    <ClInclude Include="Factory\VerticalEffect.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GameBase.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shader\Pixel\NormTex.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/Pixel/NormTex.pso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/Pixel/NormTex.pso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\Pixel\Tex.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/Pixel/Tex.pso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/Pixel/Tex.pso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\AverageBlur.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/PostEffect/aveblur.pso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/PostEffect/aveblur.pso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\BlackandWhite.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/PostEffect/baw.pso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\DepthTex.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/PostEffect/Dof/depth.pso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/PostEffect/Dof/depth.pso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\DofPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/PostEffect/Dof/dof.pso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/PostEffect/Dof/dof.pso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\FogAndRed.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/PostEffect/FtR.pso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/PostEffect/FtR.pso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\Gaussian.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/PostEffect/gauss.pso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/PostEffect/gauss.pso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\Meah4.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/PostEffect/Dof/mesh1.vs</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/PostEffect/Dof/mesh1.vs</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\Mesh1.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/PostEffect/Dof/mesh4.vs</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/PostEffect/Dof/mesh4.vs</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\mono.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/PostEffect/mono.pso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/PostEffect/mono.pso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\VolumeFog.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/PostEffect/volFog.pso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/PostEffect/volFog.pso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\Xblur.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/PostEffect/Xblur.vso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/PostEffect/Xblur.vso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\Yblur.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/PostEffect/Yblur.vso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/PostEffect/Yblur.vso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\ShadowMap\Mesh1Shadow.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/ShadowMap/Mesh.vso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/ShadowMap/Mesh.vso</ObjectFileOutput>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\ShadowMap\Mesh4Shadow.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/ShadowMap/Mesh4.vso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/ShadowMap/Mesh4.vso</ObjectFileOutput>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\ShadowMap\NMesh1Shadow.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/ShadowMap/NormMesh.vso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/ShadowMap/NormMesh.vso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\ShadowMap\ShadowMapPS.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/ShadowMap/ShadowMap.pso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/ShadowMap/ShadowMap.pso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\Vertex\Mesh.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/Vertex/Mesh.vso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/Vertex/Mesh.vso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\Vertex\Mesh4.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/Vertex/Mesh4.vso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/Vertex/Mesh4.vso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\Vertex\NormMesh.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resource/resource/Shader/Vertex/NormMesh.vso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resource/resource/Shader/Vertex/NormMesh.vso</ObjectFileOutput>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resource\icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

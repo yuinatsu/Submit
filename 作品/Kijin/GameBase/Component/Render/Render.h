@@ -11,22 +11,21 @@ class Render :
 	public ComponentBase
 {
 public:
-
+	Render();
 	virtual ~Render();
 
 	/// <summary>
-	/// 描画
+	/// 描画処理
 	/// </summary>
-	/// <param name=""></param>
-	virtual void Draw(void) = 0;
-
-	virtual void Draw(int shadowMap,int buff) = 0;
+	/// <param name="shadowMap"></param>
+	/// <param name="buff"></param>
+	virtual void Draw(int shadowMap = -1,int buff = -1) = 0;
 
 	/// <summary>
 	/// シャドウマップ作成用
 	/// </summary>
 	/// <param name=""></param>
-	virtual void SetUpShadowMap(void) = 0;
+	virtual void SetUpDepthTex(int ps = -1,int buff = -1) = 0;
 	
 	/// <summary>
 	/// 読み込み
@@ -37,6 +36,11 @@ public:
 
 	void Begin(ObjectManager& objectManager) override;
 
+	void SetDrawFlag(bool isDraw)
+	{
+		isDraw_ = isDraw;
+	}
+
 	ComponentID GetID(void) const override
 	{
 		return id_;
@@ -45,6 +49,11 @@ public:
 	SetID(ComponentID::RenderBase, ComponentID::RenderBase)
 
 protected:
+
+	// トランスフォーム
 	ComponentHandle<Transform> transform_;
+
+	// 描画するかのフラグ
+	bool isDraw_;
 };
 

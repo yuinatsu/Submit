@@ -21,15 +21,9 @@ bool Decoy::Init(void)
 			15.0f,
 			CheckType::Decoy,
 			[this](Collider& other) {
-				/*if (obj.GetObjID() != ObjID::Player)
-				{
-					alive_ = false;
-				}*/
 			},
 			*this
 				));
-	/*lpAnimMng.SetXml("Item", "Resource/Xml/ItemImage.tsx");
-	lpAnimMng.SetItem("Item", "Decoy");*/
 	AddComponent(std::make_unique<Animation>("Resource/Xml/ItemImage.xml", "Item", "Decoy", *this));
 	dynamic_cast<Animation&>(GetComponent(ComponentID::Animator)).SetState("Decoy");
 	return rtn;
@@ -43,5 +37,4 @@ void Decoy::Update(float delta)
 void Decoy::Draw(const Math::Vector2& offset, DrawMng& drawMng)
 {
 	dynamic_cast<Animation&>(GetComponent(ComponentID::Animator)).Draw(drawMng,pos_ + offset, false);
-	//(GetComponent(ComponentID::Collider, "BodyCol")).DbgDraw(offset);
 }

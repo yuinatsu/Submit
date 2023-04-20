@@ -17,7 +17,6 @@ public:
 	Box(std::shared_ptr<TmxObj>& tmxObj,UiBase& itemUi,const Math::Vector2& pos, ObjManager& objMng, ItemName itemName);
 	~Box();
 	void Init(void);
-	//void Update(float delta) override;
 	void Draw(const Math::Vector2& drawoffset, DrawMng& drawMng) override;
 	bool GetFlag(void);
 	ItemName GetItemName(void);

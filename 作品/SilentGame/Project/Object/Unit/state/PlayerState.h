@@ -321,10 +321,6 @@ struct MovePos
 			const auto& [flag, moveV, colV] = MapCollMng::CheckColl2(ray, c);
 			if (flag)
 			{
-				//obj->pos_ += moveV;
-				// dynamic_cast<Player*>(obj)->dbgTmpPos_ = obj->GetPos() + ray.vec;
-				
-				/*DebugLog("“–‚½‚è", obj->moveVec_.x, ":", obj->moveVec_.y);*/
 				return true;
 			}
 		}

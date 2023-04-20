@@ -13,8 +13,12 @@ const Vector3 CapsuleCollider::GetTop(void) const
 	{
 		return offset_;
 	}
-	auto offsetVec = VTransform(VGet(offset_.x, offset_.y, offset_.z), transform_->GetRotationMatrix());
+
+	// オフセット分ずらした座標を求める
+	auto offsetVec = transform_->GetRotation() * offset_;
 	Vector3 pos = transform_->Pos() + Vector3{offsetVec.x, offsetVec.y, offsetVec.z};
+
+	// height_分上方向の座標を返す
 	pos += (transform_.Get()->GetUp() * height_);
 	return pos;
 }
@@ -25,8 +29,12 @@ const Vector3 CapsuleCollider::GetBottom(void) const
 	{
 		return offset_;
 	}
-	auto offsetVec = VTransform(VGet(offset_.x, offset_.y, offset_.z), transform_->GetRotationMatrix());
+
+	// オフセット分ずらした座標を求める
+	auto offsetVec = transform_->GetRotation() * offset_;
 	Vector3 pos = transform_->Pos() + Vector3{ offsetVec.x, offsetVec.y, offsetVec.z };
+
+	// height分下方向の座標を返す
 	pos += (-transform_.Get()->GetUp() * height_);
 	return pos;
 }

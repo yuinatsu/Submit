@@ -90,11 +90,6 @@ void ResultDrawCtrl::Draw(void)
 	{
 		d->Draw();
 	}
-	/*DrawBox(
-		(static_cast<float>(lpSceneMng.GetScreenSize().x) / 2.0f) - 350 ,50,
-		(static_cast<float>(lpSceneMng.GetScreenSize().x) / 2.0f) + 350 ,400,
-		0x00ff00,false
-	);*/
 }
 
 const bool ResultDrawCtrl::IsStartedDraw(void) const

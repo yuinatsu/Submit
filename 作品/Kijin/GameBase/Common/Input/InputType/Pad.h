@@ -4,33 +4,48 @@
 
 constexpr int motionRange = 30000;                                  // スティックの反応可動域
 
+// ゲームパッド用
 class Pad :
 	public Controller
 {
 public:
 	Pad(int padType);
 	~Pad();
-	bool Init(void) override;										// 初期化
-	void Update(float delta) override;								// 更新 Update(deltaTime)
-	CntType GetCntType(void) override { return CntType::Pad; };		// コントローラータイプの取得
-private:
-	void SetCursorPos(const Vector2& pos = lpApp.screenSize_<float> / 2.0f) final;
 
-	/// <summary>
-	/// プレイステーション系のパッドの右スティックの更新
-	/// </summary>
-	/// <param name=""></param>
+	// 初期化 
+	bool Init(void) override;
+
+	// アップデート 
+	void Update(float delta) override;
+
+	// コントローラーのタイプの取得 
+	CntType GetCntType(void) override { return CntType::Pad; };
+
+	// ゲームパッドの情報を取得 
+	const DINPUT_JOYSTATE& GetPadState(void) const&
+	{
+		return state_;
+	}
+
+	const int GetPadType(void) const;
+private:
+
+	// カーソルの座標をセット 
+	void SetCursorPos(const Vector2& pos = lpSceneMng.screenSize_<float> / 2.0f) final;
+
+	// プレイステーション系のパッドの右スティックの更新 
 	void UpdatePsPad(float delta);
 
-	/// <summary>
-	/// xbox系のパッドの右スティックの更新
-	/// </summary>
-	/// <param name=""></param>
+	// xbox系のパッドの右スティックの更新 
 	void UpdateXboxPad(float delta);
 
+	// ゲームパッドの情報
 	DINPUT_JOYSTATE state_;
-	int padState_;
+
+	// 現在のゲームパッドの種類
 	int nowPadType_;
+
+	// 更新処理
 	void(Pad::* update_)(float);
 };
 

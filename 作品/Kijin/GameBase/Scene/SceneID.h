@@ -10,6 +10,8 @@ enum class SceneID
 	Option,		// オプション
 	Transition,	// 遷移
 	Loading,	// ロード中
+	InputSet,	// キーやパッドの設定中のシーン
+	Dialog,		// Ok&Cancel用ダイアログクラス
 };
 
 enum class ResultAttribute

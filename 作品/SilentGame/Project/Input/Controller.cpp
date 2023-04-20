@@ -5,15 +5,11 @@
 
 Controller::Controller()
 {
-    isPress_ = false;
-	isFinish_ = false;
-	PressCount_ = 0;
 	data_.fill(std::make_pair(false, false));
 }
 
 Controller::~Controller()
 {
-
 }
 
 const inputData& Controller::Get(void)
@@ -24,19 +20,16 @@ const inputData& Controller::Get(void)
 bool Controller::Press(InputID id)
 {
 	return data_[static_cast<size_t>(id)].first;
-	//return cntData_[id][static_cast<int>(Trg::Now)];
 }
 
 bool Controller::Pressed(InputID id)
 {
 	return data_[static_cast<size_t>(id)].first && !data_[static_cast<size_t>(id)].second;
-	//return cntData_[id][static_cast<int>(Trg::Now)] && !cntData_[id][static_cast<int>(Trg::Old)];
 }
 
 bool Controller::Released(InputID id)
 {
 	return !data_[static_cast<size_t>(id)].first && data_[static_cast<size_t>(id)].second;
-	//return !cntData_[id][static_cast<int>(Trg::Now)] && cntData_[id][static_cast<int>(Trg::Old)];
 }
 
 bool Controller::NotPress(InputID id)
@@ -106,39 +99,4 @@ bool Controller::IsAnyPress()
 		rtnflag |= data_[static_cast<size_t>(static_cast<InputID>(n))].first && !data_[static_cast<size_t>(static_cast<InputID>(n))].second;
 	}
 	return !rtnflag;
-}
-
-std::string Controller::LongPress(InputID id, double limit, double delta)
-{
-	if (!isPress_)
-	{
-		if (Press(InputID::Attack))
-		{
-			isPress_ = true;
-			PressCount_ = 0;
-		}
-	}
-	else
-	{
-		PressCount_ += (float)delta;
-		if (!Press(InputID::Attack))
-		{
-			isPress_ = false;
-			isFinish_ = true;
-		}
-
-		if (isFinish_)
-		{
-			isFinish_ = false;
-			if (PressCount_ < limit)
-			{
-				return "Attack";
-			}
-			else
-			{
-				return "LongAttack";
-			}
-		}
-	}
-	return "";
 }

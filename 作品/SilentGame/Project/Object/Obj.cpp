@@ -21,10 +21,6 @@ void Obj::Update(float delta)
     UpdateComponent(delta);
 }
 
-//void Obj::Draw(void) const
-//{
-//}
-
 void Obj::Draw(const Math::Vector2& offset, DrawMng& drawMng)
 {
 }
@@ -82,9 +78,6 @@ const Math::Vector2& Obj::GetMoveVec(void) const
 
 void Obj::MovePos(float delta)
 {
-   // MapCollMng::Ray ray{ pos_,moveVec_ * speed_ * spMag_ };
-   
-
     // 後でデルタタイム使ったものに変更予定
     pos_ += moveVec_ * (speed_ * delta * spMag_);
 }
@@ -108,11 +101,6 @@ const float Obj::GetSpMag(void) const
 {
     return spMag_;
 }
-
-//void Obj::SetAnimState(std::string str)
-//{
-//    anim_->state(str);
-//}
 
 void Obj::UpdateComponent(float delta) const
 {

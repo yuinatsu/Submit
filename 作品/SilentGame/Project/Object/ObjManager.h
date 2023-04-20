@@ -3,7 +3,6 @@
 #include <list>
 #include <vector>
 #include <fstream>
-//#include "../Object/Obj.h"
 #include <map>
 #include "../common/Math.h"
 #include "Effect/EffectID.h"
@@ -11,8 +10,8 @@
 #include "../common/Random.h"
 #include "../common/Structure.h"
 
- 	class Obj;
-	using BoxItem = std::map<ItemName, bool>;
+class Obj;
+using BoxItem = std::map<ItemName, bool>;
 class TmxObj;
 class GmkEvent;
 class UiBase;

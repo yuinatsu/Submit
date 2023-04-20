@@ -13,14 +13,13 @@ const Vector3 SphereCollider::GetPos(void) const
 	{
 		return offset_;
 	}
-	auto offsetVec = VTransform(VGet(offset_.x, offset_.y, offset_.z), transform_->GetRotationMatrix());
+
+
+	auto offsetVec = transform_->GetRotation() * offset_;
 	Vector3 pos = transform_->GetPos();
-	pos += transform_->GetRight() * offset_.x;
-	pos += transform_->GetUp() * offset_.y;
-	pos += transform_->GetForward() * offset_.z;
+	pos += offsetVec;
 	DebugDrawLine(transform_->GetPos(), pos, 0xffffff);
 	return pos;
-	//return transform_->pos_ + offset_;
 }
 
 #ifdef _DEBUG
@@ -71,7 +70,7 @@ bool SphereCollider::Check(CharactorCollider& col, ObjectManager& objectManager)
 
 bool SphereCollider::Check(TerrainCollider& col, ObjectManager& objectManager)
 {
-	return Collider::HitCheck(*this, col);
+	return Collider::HitCheck(*this, col,objectManager);
 }
 
 

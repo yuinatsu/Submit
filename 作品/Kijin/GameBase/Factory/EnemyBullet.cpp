@@ -7,7 +7,7 @@
 #include "../Component/Collider/SphereCollider.h"
 #include "../Component/Transform/Transform.h"
 #include "../Common/ResourceMng.h"
-#include "../Application.h"
+#include "../SceneManager.h"
 constexpr int maxPool{ 20 };
 
 EnemyBulletFactory::EnemyBulletFactory(ObjectManager& objectManager) :
@@ -18,7 +18,7 @@ EnemyBulletFactory::EnemyBulletFactory(ObjectManager& objectManager) :
 		behaviorPool_.emplace_front(std::make_unique<EnemyBulletBehavior>());
 	}
 
-	lpResourceMng.LoadModel(model_,"Resource/resource/Bullet.mv1");
+	lpSceneMng.GetResourceMng().LoadModel(model_,"Resource/resource/Bullet.mv1");
 }
 
 EnemyBulletFactory::~EnemyBulletFactory()
@@ -45,6 +45,7 @@ ObjectID EnemyBulletFactory::Create(ObjectID ownerID, const Vector3& pos, const 
 
 	auto modelRender = objectManager_.GetPool().Pop<ModelRender>();
 	static_cast<Render&>(*modelRender).Load("Resource/resource/Bullet.mv1");
+	modelRender->SetBoundingSize({ -15.0f,15.0f,15.0f }, { 15.0f,-15.0f,-15.0f });
 	objectManager_.AddComponent(std::move(modelRender), id);
 
 	auto spCol = objectManager_.GetPool().Pop<SphereCollider>();
@@ -56,8 +57,8 @@ ObjectID EnemyBulletFactory::Create(ObjectID ownerID, const Vector3& pos, const 
 	auto ownerTransform = objectManager_.GetComponent<Transform>(ownerID);
 	if (ownerTransform.IsActive())
 	{
-		trans->SetRotFromEulerRot({ Deg2Rad(5.0f), 0.0f, 0.0f });
-		trans->AddRotationMatrix(ownerTransform->GetRotationMatrix());
+		trans->SetRotation({ Deg2Rad(5.0f), 0.0f, 0.0f });
+		trans->AddRotation(ownerTransform->GetRotation());
 	}
 	objectManager_.AddComponent(std::move(trans), id);
 

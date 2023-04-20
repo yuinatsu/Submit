@@ -4,14 +4,15 @@
 
 class BaseScene;
 
+// クリックできるボタン
 class Button :
     public ButtonBase
 {
 	using PushFunc = std::function<void(BaseScene&)>;
 public:
-	Button(PushFunc&& pushFunc, const std::filesystem::path& btnPath, const std::filesystem::path& hitCursorPath, const Vector2& pos);
-	void Update(float delta, ObjectManager& objMng, Controller& controller);
-	void Draw();
+	Button(const PushFunc& pushFunc, const std::filesystem::path& btnPath, const std::filesystem::path& hitCursorPath, const Vector2& pos);
+	void Update(float delta, BaseScene& scene, ObjectManager& objMng, Controller& controller) final;
+	void Draw(int mainScr) final;
 
 private:
 	void Push(BaseScene& scene, Controller& controller) final;
@@ -22,7 +23,7 @@ private:
 	{
 		return UiID::Button;
 	}
-	void Loaded(void) final;
+	void Loaded(BaseScene& scene) final;
 
 	/// <summary>
 	/// カーソルと当たっている時の描画

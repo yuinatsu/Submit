@@ -1,3 +1,0 @@
-dxlib 隠し関数
-DrawGraphToZBuffer
-SetDrawZ

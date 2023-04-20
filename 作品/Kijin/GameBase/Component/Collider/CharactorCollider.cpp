@@ -5,7 +5,8 @@
 CharactorCollider::CharactorCollider() :
 	height_{0.0f}, radius_{0.0f}, isGround_{false}, gravityPow_{1.0f}, speed_{0.0f}
 {
-
+	// キャラクターは強制的に有効
+	isBlock_ = true;
 }
 
 const Vector3 CharactorCollider::GetTop(void) const
@@ -14,8 +15,12 @@ const Vector3 CharactorCollider::GetTop(void) const
 	{
 		return offset_;
 	}
-	auto offsetVec =  VTransform(VGet(offset_.x, offset_.y, offset_.z), transform_->GetRotationMatrix());
+
+	// オフセット分ずらした座標を求める
+	auto offsetVec = transform_->GetRotation() * offset_;
 	Vector3 pos = transform_->Pos() + Vector3{offsetVec.x, offsetVec.y, offsetVec.z};
+
+	// 上方向分ずらした座標を返す
 	pos += (transform_.Get()->GetUp() * height_);
 	return pos;
 }
@@ -26,8 +31,11 @@ const Vector3 CharactorCollider::GetBottom(void) const
 	{
 		return offset_;
 	}
-	Vector3 pos = transform_.Get()->Pos() + (-transform_.Get()->GetUp() * height_);
-	pos += offset_;
+	auto offsetVec = transform_->GetRotation() * offset_;
+	Vector3 pos = transform_->Pos() + Vector3{ offsetVec.x, offsetVec.y, offsetVec.z };
+
+	// 下方向分ずらした座標を返す
+	pos += (-transform_.Get()->GetUp() * height_);
 	return pos;
 }
 

@@ -16,7 +16,6 @@
 #include "../common/SoundPross.h"
 #include "../Object/ObjManager.h"
 #include "../common/ImageMng.h"
-//#include "../Shader/ShaderDrawGraph.h"
 
 #include "../common/Debug.h"
 #include "../common/MenuUI/MenuUI.h"
@@ -47,7 +46,6 @@ SelectScene::SelectScene()
 
 SelectScene::~SelectScene()
 {
-	//SoundProcess::Release();
 }
 
 void SelectScene::SoundPlay(void)
@@ -75,8 +73,6 @@ void SelectScene::InitGame(void)
 	// 左右でカーソルを操作する
 	menuUICtrl_->SetMinusInputID(InputID::Left);
 	menuUICtrl_->SetPlusInputID(InputID::Right);
-	/*menuUICtrl_->SetMinusInputID(InputID::Up);
-	menuUICtrl_->SetPlusInputID(InputID::Down);*/
 	menuUICtrl_->AddMenu(SELECT_TYPE3::Title, std::make_unique<MenuUI>(Math::Vector2{static_cast<float>( ScreenSizeX / 2), static_cast<float>(ScreenSizeY / 2 + 280) }, "Resource/Image/SelectScene/Title.png"));
 	menuUICtrl_->AddMenu(SELECT_TYPE3::Setting, std::make_unique<MenuUI>(Math::Vector2{ static_cast<float>(ScreenSizeX / 2 + 480), static_cast<float>(ScreenSizeY / 2 + 280) }, "Resource/Image/SelectScene/setting.png"));
 	menuUICtrl_->SetFlag(false);
@@ -159,7 +155,6 @@ uniqueScene SelectScene::UpdateSetting(float delta, uniqueScene ownScene)
 			{
 				if (controller_->Pressed(InputID::Right))
 				{
-					// PlaySoundMem(se1, DX_PLAYTYPE_BACK);
 					if (selectType_ < static_cast<int>(SELECT_TYPE::StageFifteen))
 					{
 						SoundProcess::PlayBackSound(SoundProcess::SOUNDNAME_SE::select, SoundProcess::GetSEVolumeEntire(), false);
@@ -172,7 +167,6 @@ uniqueScene SelectScene::UpdateSetting(float delta, uniqueScene ownScene)
 
 				if (controller_->Pressed(InputID::Left))
 				{
-					// PlaySoundMem(se1, DX_PLAYTYPE_BACK);
 					if (selectType_ > static_cast<int>(SELECT_TYPE::TOne))
 					{
 						SoundProcess::PlayBackSound(SoundProcess::SOUNDNAME_SE::select, SoundProcess::GetSEVolumeEntire(), false);
@@ -222,8 +216,6 @@ uniqueScene SelectScene::UpdateNext(uniqueScene ownScene)
 {
 	mapNum_ = selectType_;
 	// マップがまだ作られていないときはゲームが始まらないように
-
-
 	if (mapNum_ == 0)
 	{
 		Relese();
@@ -269,7 +261,6 @@ void SelectScene::DrawOwnScreen(float delta)
 	SetDrawScreen(screenID_);
 	ClsDrawScreen();
 	DrawBg();
-	//DrawTutorial();
 	DrawSetting();
 }
 
@@ -323,8 +314,6 @@ void SelectScene::DrawSetting(void)
 
 void SelectScene::DrawMap(int StageID, bool Left, bool Right)
 {
-	
-
 	if (moveMapR_)
 	{
 		if (mapPicPosX < (moveMap_ - speed))
@@ -332,7 +321,6 @@ void SelectScene::DrawMap(int StageID, bool Left, bool Right)
 			moveMapOld_ -= speed;
 			moveMap_ -= speed;
 		}
-
 		else
 		{
 
@@ -370,10 +358,6 @@ void SelectScene::DrawMap(int StageID, bool Left, bool Right)
 
 	DrawRotaGraph(static_cast<int>(moveMap_), static_cast<int>(mapPicPosY), 1.0, 0, lpImageMng.GetID("Stage")[stageData_[selectType_].stageImgIdx_], true);
 	
-	/*if (!moveMapL_ && !moveMapR_)
-	{
-		DrawFormatString(static_cast<int>(moveMap_), static_cast<int>(mapPicPosY - 100), 0x000000, mapsize.c_str());
-	}*/
 	if (selectType2_ == 0)
 	{
 		SetDrawBright(255,128, 0);
@@ -410,13 +394,10 @@ void SelectScene::DrawMap(int StageID, bool Left, bool Right)
 
 	if (Left)
 	{
-		// MyDrawRotaGraph((ScreenSizeX / 2) + (StringPos - (ScreenSizeX / 2 + selecterLPos_)), (ScreenSizeY / 2) + (OffsetY - (ScreenSizeY / 2 - 10)), 0.1, 0, selecterLPic_);
-		
 		DrawRotaGraph(static_cast<int>((ScreenSizeX / 2.0f) + (StringPos - (ScreenSizeX / 2.0f + selecterLPos))), static_cast<int>((ScreenSizeY / 2) + (OffsetY - (ScreenSizeY / 2 - 10))), 0.1, 0, selecterLPic_, true);
 	}
 	if ( Right)
 	{
-		
 		DrawRotaGraph((ScreenSizeX / 2) - (static_cast<int>(StringPos) - (ScreenSizeX / 2 + selecterLPos)), (static_cast<int>(ScreenSizeY) / 2) + (OffsetY - (ScreenSizeY / 2 - 10)), 0.1, 0, selecterPic_, true);
 	}
 }

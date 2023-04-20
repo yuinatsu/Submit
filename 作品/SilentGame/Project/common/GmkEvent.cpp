@@ -40,7 +40,6 @@ GmkEvent::GmkEvent(std::shared_ptr< ResultData>& resultData) :
 
 GmkEvent::~GmkEvent()
 {
-	// oundProcess::SoundStop(SoundProcess::SOUNDNAME_SE::waring);
 }
 
 

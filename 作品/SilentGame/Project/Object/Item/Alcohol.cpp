@@ -37,5 +37,4 @@ void Alcohol::Update(float delta)
 void Alcohol::Draw(const Math::Vector2& offset, DrawMng& drawMng)
 {
 	dynamic_cast<Animation&>(GetComponent(ComponentID::Animator)).Draw(drawMng,pos_ + offset, false);
-	//(GetComponent(ComponentID::Collider, "BodyCol")).DbgDraw(offset);
 }

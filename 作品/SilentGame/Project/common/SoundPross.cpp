@@ -132,15 +132,11 @@ namespace SoundProcess
 
 	void SoundStop(SOUNDNAME_SE name)
 	{
-		// SE‚Ì‰¹—Ê‚ð0‚É‚·‚é
-		//ChangeVolumeSoundMem(vol, se_sound[static_cast<int>(name)]);
 		StopSoundMem(se_sound[static_cast<int>(name)]);
 	}
 
 	void SoundStop(SOUNDNAME_BGM name)
 	{
-		// BGM‚Ì‰¹—Ê‚ð0‚É‚·‚é
-		//ChangeVolumeSoundMem(vol, bgm_sound[static_cast<int>(name)]);
 		StopSoundMem(bgm_sound[static_cast<int>(name)]);
 	}
 	void SoundPlay(SOUNDNAME_SE name, bool loopflag, float loopTime)

@@ -1,8 +1,10 @@
 #include "Animator.h"
 #include <DxLib.h>
 #include "../../Object/ObjectManager.h"
+#include "../../Common/Math.h"
 
 #include "../../Common/Debug.h"
+#include "../Behavior/PlayerBehavior.h"
 
 void Animator::SetNextAnimation(int idx, float blendTime)
 {
@@ -27,7 +29,7 @@ void Animator::SetNextAnimation(int idx, float blendTime)
 
 void Animator::Update(BaseScene& scene, ObjectManager& objectManager, float delta, Controller& controller)
 {
-	nowState_ = nowState_->Update(nowState_, delta);
+	nowState_ = nowState_->Update(nowState_, objectManager ,delta);
 }
 
 void Animator::Begin(ObjectManager& objectManager)
@@ -53,31 +55,31 @@ void NormalState::Init(AnimationState* start, AnimationState* end)
 	start->Detach();
 }
 
-AnimationState* NormalState::Update(AnimationState* state, float delta)
+AnimationState* NormalState::Update(AnimationState* state, ObjectManager& objManager, float delta)
 {
-	//moveAnimFrameIndex_ = MV1SearchFrame(handle_, L"Center");
-	//MV1SetFrameUserLocalMatrix(handle_, moveAnimFrameIndex_, MGetIdent());
-	//prevPosition_ = MV1GetAttachAnimFrameLocalPosition(handle_, attachIdx_, moveAnimFrameIndex_);
+	MV1ResetFrameUserLocalMatrix(handle_, MV1SearchFrame(handle_, L"Center"));
+	moveAnimFrameIndex_ = MV1SearchFrame(handle_, L"Root");
+	MV1SetFrameUserLocalMatrix(handle_, moveAnimFrameIndex_, MGetTranslate(VGet(0.0f, -5.0f, 0.0f)));
+	prePos_ = MV1GetAttachAnimFrameLocalPosition(handle_, attachIdx_, moveAnimFrameIndex_);
+
 	playTime_ += delta * 60.0f;
 	DebugDrawString(playTime_);
-	auto a = MV1GetAttachAnimBlendRate(handle_, attachIdx_);
+
 	if (playTime_ >= totalTime_)
 	{
-		//MV1SetAttachAnimTime(handle_, attachIdx_, totalTime_);
-		//nowPosition_ = MV1GetAttachAnimFrameLocalPosition(handle_, attachIdx_, moveAnimFrameIndex_);
-		//position_ += nowPosition_ - prevPosition_;
+		MV1SetAttachAnimTime(handle_, attachIdx_, totalTime_);
+		nowPos_ = MV1GetAttachAnimFrameLocalPosition(handle_, attachIdx_, moveAnimFrameIndex_);
+		pos_ = nowPos_ - prePos_;
 		// 総再生時間まで再生したとき
 		if (isLoop_)
 		{
 			// ループするとき再生時間を0にする
 			playTime_ = 0.0f;
-			//// 次に『新しいアニメーション再生時間での「アニメーションで移動をしているフレームの座標」と
-			//// 『アニメーション再生時間０での「アニメーションで移動しているフレームの座標」』との差分をモデルの座標に加算する
-			//MV1SetAttachAnimTime(handle_, attachIdx_, 0.0f);
-			//prevPosition_ = MV1GetAttachAnimFrameLocalPosition(handle_, attachIdx_, moveAnimFrameIndex_);
-			//MV1SetAttachAnimTime(handle_, attachIdx_, playTime_);
-			//nowPosition_ = MV1GetAttachAnimFrameLocalPosition(handle_, attachIdx_, moveAnimFrameIndex_);
-			//position_ += nowPosition_ - prevPosition_;
+			MV1SetAttachAnimTime(handle_, attachIdx_, 0.0f);
+			prePos_ = MV1GetAttachAnimFrameLocalPosition(handle_, attachIdx_, moveAnimFrameIndex_);
+			MV1SetAttachAnimTime(handle_, attachIdx_, playTime_);
+			nowPos_ = MV1GetAttachAnimFrameLocalPosition(handle_, attachIdx_, moveAnimFrameIndex_);
+			pos_ = nowPos_ - prePos_;
 		}
 		else
 		{
@@ -88,24 +90,25 @@ AnimationState* NormalState::Update(AnimationState* state, float delta)
 	}
 	else
 	{
-		//// 再生時間をセット
-		//MV1SetAttachAnimTime(handle_, attachIdx_, playTime_);
-		//// 『新しいアニメーション再生時間での「アニメーションで移動をしているフレームの座標」』と、
-		//// 『アニメーション再生時間を進める前の「アニメーションで移動をしているフレームの座標」』との差分をモデルの座標に加算する
-		//nowPosition_ = MV1GetAttachAnimFrameLocalPosition(handle_, attachIdx_, moveAnimFrameIndex_);
-		//position_ += nowPosition_ - prevPosition_;
+		MV1SetAttachAnimTime(handle_, attachIdx_, playTime_);
+		nowPos_ = MV1GetAttachAnimFrameLocalPosition(handle_, attachIdx_, moveAnimFrameIndex_);
+		pos_ += nowPos_ - prePos_;
 	}
 	return state;
+}
+
+bool NormalState::IsEnd(void)
+{
+	return !isLoop_ && playTime_ >= totalTime_;
 }
 
 
 
 void BlendState::Init(AnimationState* start, AnimationState* end)
 {
-	position_ = VGet(0.0f, 0.0f, 0.0f);
+	pos_ = VGet(0.0f, 0.0f, 0.0f);
 	start_ = start;
 	end_ = end;
-	//blendTime_ = 1.0f;
 	playTime_ = 0.0f;
 	playTimeOver_ = 0.0f;
 	end_->Attach();
@@ -114,11 +117,11 @@ void BlendState::Init(AnimationState* start, AnimationState* end)
 	MV1SetAttachAnimBlendRate(end_->GetHandle(), end_->GetAttachIdx(), 0.0f);
 }
 
-AnimationState* BlendState::Update(AnimationState* state, float delta)
+AnimationState* BlendState::Update(AnimationState* state, ObjectManager& objManager,float delta)
 {
 	// ブレンドするアニメーションを再生処理する
-	start_->Update(nullptr, delta);
-	end_->Update(nullptr, delta);
+	start_->Update(nullptr, objManager,delta);
+	end_->Update(nullptr, objManager, delta);
 
 	// 秒数に応じてブレンド率を変える
 	playTime_ += delta;
@@ -134,6 +137,11 @@ AnimationState* BlendState::Update(AnimationState* state, float delta)
 	}
 	
 	return state;
+}
+
+bool BlendState::IsEnd(void)
+{
+	return false;
 }
 
 void AnimationState::ReStart(void)

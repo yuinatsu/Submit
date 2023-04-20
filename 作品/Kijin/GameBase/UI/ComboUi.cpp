@@ -1,20 +1,19 @@
 #include "ComboUi.h"
 #include <DxLib.h>
-#include "../Application.h"
+#include "../SceneManager.h"
 #include "../Common/ResourceMng.h"
 #include "../Common/Debug.h"
 #include "../Object/ObjectManager.h"
 #include "../Component/Behavior/PlayerBehavior.h"
 #include "../Component/Info/ObjectInfo.h"
 
-ComboUi::ComboUi(const std::filesystem::path& path, const Vector2& pos) : UiBase(pos)
+ComboUi::ComboUi(const std::filesystem::path& numPath, const Vector2I& div, const Vector2I& size, const std::filesystem::path& fontPath, const Vector2& pos, const Vector2& interval) : UiBase(pos)
 {
-	lpResourceMng.LoadTexture(handle_, path);
+	size_ = size;
+	lpSceneMng.GetResourceMng().LoadDivTexture(divHandle_, numPath, div, size_);
+	lpSceneMng.GetResourceMng().LoadTexture(handle_, fontPath);
 	pos_ = pos;
-	//GetGraphSizeF(*handle_, &size_.x, &size_.y);
-	auto div = Vector2I{ 10, 1 };
-	auto size = Vector2I{ 100, 130 };
-	LoadDivGraph(L"Resource/resource/Ui/num.png", div.x * div.y, div.x, div.y, size.x, size.y, hd_);
+	interval_ = interval;
 	combo_ = 0;
 }
 
@@ -22,32 +21,30 @@ ComboUi::~ComboUi()
 {
 }
 
-void ComboUi::Update(float delta, ObjectManager& objMng, Controller& controller)
+void ComboUi::Update(float delta, BaseScene& scene, ObjectManager& objMng, Controller& controller)
 {
 	auto player = objMng.GetComponent<PlayerBehavior>(objMng.GetPlayerID());
 	combo_ = player->GetComboNum();
 }
 
-void ComboUi::Draw()
+void ComboUi::Draw(int mainScr)
 {
 	if (!combo_)
 	{
 		return;
 	}
 
-	auto size = Vector2{ 100, 130 };
-	Vector2 comboFontPos = { pos_.x + 80, pos_.y + 40 };
 	if (combo_ / 100 != 0)
 	{
 		// 3Œ…–Ú
-		DrawGraph(pos_.x - size.x, pos_.y, hd_[combo_ / 100], true);
+		DrawGraph(pos_.x - size_.x, pos_.y, divHandle_[combo_ / 100], true);
 	}
 	if (combo_ / 10 != 0)
 	{
 		// 2Œ…–Ú
-		DrawGraph(pos_.x - size.x / 2, pos_.y, hd_[combo_ / 10], true);
+		DrawGraph(pos_.x - size_.x / 2, pos_.y, divHandle_[combo_ / 10], true);
 	}
 	// 1Œ…–Ú
-	DrawGraph(pos_.x, pos_.y, hd_[combo_ % 10], true);
-	DrawGraph(comboFontPos.x, comboFontPos.y, *handle_, true);
+	DrawGraph(pos_.x, pos_.y, divHandle_[combo_ % 10], true);
+	DrawGraph(pos_.x + interval_.x, pos_.y + interval_.y, *handle_, true);
 }

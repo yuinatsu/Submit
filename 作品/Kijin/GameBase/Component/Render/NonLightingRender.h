@@ -1,12 +1,13 @@
 #pragma once
 #include "ModelRender.h"
+
+// ライティングとかしない描画をするクラス(スカイドームとか)
 class NonLightingRender :
     public ModelRender
 {
 public:
 private:
-    void Draw(void) final;
-    void Draw(int shadowMap, int buff) final;
-    void SetUpShadowMap(void) final;
+    void Draw(int shadowMap = -1, int buff = -1) final;
+    void SetUpDepthTex(int ps = -1,int buff = -1) final;
 };
 

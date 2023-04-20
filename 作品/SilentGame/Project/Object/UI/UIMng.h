@@ -12,50 +12,41 @@ class ObjManager;
 class UIMng
 {
 public:
-	/// <summary> コンストラクタ </summary>
+	// コンストラクタ 
 	UIMng();
 	~UIMng();
 
-	/// <summary> 更新 </summary>
-	/// <param name="delta"> デルタタイム </param>
-	/// <param name="objMng"> ObjクラスのManager </param>
-	/// <returns> 正常動作:true </returns>
+	// 更新 
 	bool Update(float delta, const std::shared_ptr<ObjManager> objMng);
 
-	/// <summary> 描画 </summary>
-	/// <param name="delta"> デルタタイム </param>
+	// 描画 
 	void Draw(const double& delta);
 
-	/// <summary> itemUIのshered_ptr取得 </summary>
-	/// <returns> itemUI_ </returns>
+	// itemUIのshered_ptr取得 
 	std::shared_ptr<UiBase> GetItemUI() { return itemUI_; }
 
-	/// <summary> staminaUIのshered_ptr取得 </summary>
-	/// <returns> staminaUI_ </returns>
+	// staminaUIのshered_ptr取得 
 	std::shared_ptr<UiBase> GetStaminaUI() { return staminaUI_; }
 
+	// 開始時演出終了
 	bool FinStart();
 private:
-	/// <summary> アイテム取得と使用アイテムの更新 </summary>
-	/// <param name="delta"> デルタタイム </param>
-	/// <param name="objMng"> ObjクラスのManager </param>
-	/// <returns> 正常動作:true </returns>
+	// アイテム取得と使用アイテムの更新 
 	bool UpdateGetUse(float delta, const std::shared_ptr<ObjManager> objMng);
 
-	/// <summary> スピード倍率更新 </summary>
-	/// <param name="objMng"> ObjクラスのManager </param>
-	/// <returns> 正常動作:true </returns>
+	// スピード倍率更新 
 	bool UpdateSpMag(const std::shared_ptr<ObjManager> objMng);
 
-	/// <summary> アイテムUI </summary>
+	// アイテムUI 
 	std::shared_ptr<UiBase> itemUI_;
 
-	/// <summary> スタミナUI </summary>
+	// スタミナUI 
 	std::shared_ptr<UiBase> staminaUI_;
 
-	/// <summary> スタミナ動作フラグ </summary>
+	// スタミナ動作フラグ 
 	bool stanimaF_;
 
+	// エフェクトフラグ
 	bool effectF_;
 };
 

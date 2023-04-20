@@ -1,35 +1,41 @@
 #include "EnemyBehavior.h"
 #include "../Transform/Transform.h"
-#include "../../Application.h"
+#include "../../SceneManager.h"
 #include "../../Object/ObjectManager.h"
 #include "../Info/ObjectInfo.h"
 #include "../Behavior/StageBehavior.h"
-#include "../../Common/Debug.h"
 #include "PlayerBehavior.h"
 #include "EnemyBulletBehavior.h"
 #include "PlayerAttackBehavior.h"
 #include "../../Common/SoundPross.h"
+#include "../ComponentPool.h"
+#include "EnemyAttackBehavior.h"
 
-// 発射位置の上方向のずらす量
-constexpr float shotUpOffset{ 240.0f };
 
-// 発射位置の前方向のずらす量
-constexpr float shotForwardOffset{ 300.0f };
+#include "../../Common/Debug.h"
 
-// 発射位置の右方向のずらす量
-constexpr float shotRightOffset{ 60.0f };
-
-// 弾を発射するまでの時間
-constexpr float shotTimeMax{ 2.5f };
 
 // 回転が必要な範囲(角度)
 constexpr float rotDeff{ Square(Deg2Rad(15.0f)) };
 
 // ノックバック時の初速
-constexpr float v0{ 6.0f };
+constexpr float v0{ 9.0f };
 
 // ノックバック用の重力加速度
-constexpr float gravity{ 9.80f * 3.0f };
+constexpr float gravity{ 9.80f * 10.0f };
+
+// アニメーションインデックス用
+enum class EnemyAnim
+{
+	Wait,			// 待機状態
+	WalkHaveGun,	// 銃を持って歩く
+	WalkHaveSword,	// 近接武器を持って歩く
+	GunToSword,		// 銃から近接武器へ切り替える
+	AttackSword,	// 近接武器で攻撃する
+	AttackGun,		// 銃を構える
+	GetHit,			// 攻撃を受けた時
+	SwordToGun		// 近接武器から銃に切り替える
+};
 
 // コンストラクタ
 EnemyBehavior::EnemyBehavior()
@@ -53,20 +59,23 @@ void EnemyBehavior::Update(BaseScene& scene, ObjectManager& objectManager, float
 	Gravity(delta);
 
 	(this->*update_)(objectManager, delta);
+
 }
 
 // カウンタ変数や時間用変数の初期化
 void EnemyBehavior::Init(void)
 {
 	shotTime_ = 0.0f;
+	burstCnt_ = 0;
 	damageCnt_ = 0;
-	rotTime_ = 0.0f;
+	isRot_ = false;
 	stateTime_ = 0.0f;
 	hitTime_ = 0.0f ;
-	startRot_= 0.0f ;
-	targetRot_ = 0.0f;
+	rotSing_ = 0.0f ;
 	hitCombo_ = 0;
+	jumpTime_ = 0.0f;
 }
+
 
 // 有効時の開始処理
 void EnemyBehavior::Begin(ObjectManager& objectManager)
@@ -76,7 +85,6 @@ void EnemyBehavior::Begin(ObjectManager& objectManager)
 
 	// トランスフォームを取得
 	transform_ = objectManager.GetComponent<Transform>(ownerId_);
-	transform_->Pos().y += 5.0f;
 
 	// プレイヤーのトランスフォームを取得
 	playerT_ = objectManager.GetComponent<Transform>(objectManager.GetPlayerID());
@@ -84,9 +92,36 @@ void EnemyBehavior::Begin(ObjectManager& objectManager)
 	// コライダーを取得しヒット時の関数をセット
 	collider_ = objectManager.GetComponent<CharactorCollider>(ownerId_);
 	collider_->SetHitFunc(std::bind(&EnemyBehavior::OnHit, this,std::placeholders::_1, std::placeholders::_2));
+	collider_->SetGroundFlag(true);
 
 	// 更新用関数をセット
 	update_ = &EnemyBehavior::UpdateMove;
+
+	if (isTutorial_)
+	{
+		// チュートリアルの時は弾を撃たないようセット
+		shot_ = &EnemyBehavior::NonShot;
+	}
+	else
+	{
+		shot_ = &EnemyBehavior::Shot;
+	}
+	
+	// レーザーサイト取得
+	laserSight_ = objectManager.GetComponent<EnemyLaserSightBehavior>(laserSightID_);
+
+	// アニメーター取得
+	animetor_ = objectManager.GetComponent<Animator>(ownerId_);
+
+	// アニメーションをセット
+	animetor_->AddAnimation(static_cast<int>(EnemyAnim::Wait), true);
+	animetor_->AddAnimation(static_cast<int>(EnemyAnim::WalkHaveGun), true);
+	animetor_->AddAnimation(static_cast<int>(EnemyAnim::GunToSword), false);
+	animetor_->AddAnimation(static_cast<int>(EnemyAnim::AttackSword), false);
+	animetor_->AddAnimation(static_cast<int>(EnemyAnim::AttackGun), true);
+	animetor_->AddAnimation(static_cast<int>(EnemyAnim::GetHit), false);
+	animetor_->AddAnimation(static_cast<int>(EnemyAnim::SwordToGun), false);
+	animetor_->SetNextAnimation(static_cast<int>(EnemyAnim::Wait));
 }
 
 // 終了処理
@@ -97,7 +132,7 @@ void EnemyBehavior::End(ObjectManager& objectManager)
 	if (stage.IsActive())
 	{
 		// ステージが生きている時ステージの敵のカウントを減らさせる
-		stage->SubEnemy();
+		stage->SubEnemy(ownerId_);
 	}
 }
 
@@ -109,53 +144,53 @@ void EnemyBehavior::UpdateSearch(ObjectManager& objectManager, float delta)
 		// 一定の距離になったら移動開始する
 		stateTime_ = 0.0f;
 		update_ = &EnemyBehavior::UpdateMove;
+		animetor_->SetNextAnimation(static_cast<int>(EnemyAnim::WalkHaveGun), 0.5f);
 	}
 }
 
 // 射撃処理
-void EnemyBehavior::Shot(float delta, ObjectManager& objectManager)
+void EnemyBehavior::Shot(ObjectManager& objectManager,float delta)
 {
 	shotTime_ += delta;
-	if (shotTime_ >= shotTimeMax)
+	if (shotTime_ >= 0.0f)
 	{
-		shotTime_ = 0.0f;
+		if (shotTime_ >= shotData_.burstInterval)
+		{
+			shotTime_ = 0.0f;
+			burstCnt_++;
+			auto shotPos = transform_->GetPos() + (transform_->GetRotation() * Vector3 { 10.0f, 190.0f, 120.0f });
 
-		// 前上右のベクトルを取得
-		auto up = transform_->GetUp();
-		auto forward = transform_->GetForward();
-		auto right = transform_->GetRight();
-		auto shotPos = transform_->GetPos();
+			// 右上方向にずらして作成
+			auto id = objectManager.CreateFromFactory(FactoryID::EnemyBullet, ownerId_, shotPos);
+			objectManager.Begin(id);
+			// マズルフラッシュエフェクト
+			auto effect = objectManager.CreateFromFactory(FactoryID::MuzzleFlashEffect, ownerId_, shotPos, { 0.0f,transform_->GetRotation().ToEuler().y + Deg2Rad(180.0f), 0.0f});
+			objectManager.GetComponent<Transform>(effect)->Scale() = Vector3{ 0.5f,0.5f,0.5f };
+			objectManager.Begin(effect);
 
-		// 上方向と前方向にずらす
-		shotPos += up * shotUpOffset;
-		shotPos += forward * shotForwardOffset;
+			if (burstCnt_ >= shotData_.burstNum)
+			{
+				// 規定の数発射したら0にする
+				burstCnt_ = 0;
+				shotTime_ = -shotData_.shotInterval;
+			}
+		}
 
-		// 右上方向にずらして作成
-		auto id = objectManager.CreateFromFactory(FactoryID::EnemyBullet, ownerId_, shotPos + right * shotRightOffset);
-		objectManager.Begin(id);
+		//// 座標の取得
+		//auto bPos = VGet(shotPos.x, shotPos.y, shotPos.z);			// 弾の座標
 
-		// 左上方向にずらして作成
-		id = objectManager.CreateFromFactory(FactoryID::EnemyBullet, ownerId_, shotPos - right * shotRightOffset);
-		objectManager.Begin(id);
+		//// サウンドの座標を取得
+		//Set3DPositionSoundMem(bPos, static_cast<int>(SOUNDNAME_SE::enemyAttack));
 
-		// 右下方向にずらして作成
-		shotPos += -up * 70.0f;
-		id = objectManager.CreateFromFactory(FactoryID::EnemyBullet, ownerId_,  shotPos + right * 80.0f);
-		objectManager.Begin(id);
-
-		// 左下方向にずらして作成
-		id = objectManager.CreateFromFactory(FactoryID::EnemyBullet, ownerId_, shotPos - right * 80.0f);
-		objectManager.Begin(id);
-
-		SoundProcess::PlayBackSound(SoundProcess::SOUNDNAME_SE::enemyAttack, SoundProcess::GetVolume(), false);
-
-		// サウンドの座標を取得
-		//Set3DPositionSoundMem(shotPos), static_cast<int>(SoundProcess::SOUNDNAME_SE::enemyAttack));
-
-		// サウンドが届く範囲を指定
-		Set3DRadiusSoundMem(256.0f, static_cast<int>(SoundProcess::SOUNDNAME_SE::enemyAttack));
-			
+		//// サウンドが届く範囲を指定
+		//Set3DRadiusSoundMem(256, static_cast<int>(SOUNDNAME_SE::enemyAttack));
 	}
+}
+
+// 射撃しないときの処理
+void EnemyBehavior::NonShot(ObjectManager& objectManager, float delta)
+{
+	// なにもしない
 }
 
 // 追跡移動状態の処理
@@ -166,21 +201,32 @@ void EnemyBehavior::UpdateMove(ObjectManager& objectManager, float delta)
 
 	// 移動
 	transform_->Pos() += transform_->GetForward() * (delta * speed_);
-	
-	// 射撃処理
-	Shot(delta, objectManager);
+	collider_->SetSpeed((delta * speed_));
+	collider_->SetMoveDir(transform_->GetForward());
 
-	if ((transform_->GetPos() - playerT_->GetPos()).SqMagnitude() <= Square(stopDistance_))
+	if (!animetor_->GetAnimState()->IsBlend())
 	{
-		// 一定の距離になったら停止状態へ
-		stateTime_ = 0.0f;
-		update_ = &EnemyBehavior::UpdateStop;
-	}
-	else if ((transform_->GetPos() - playerT_->GetPos()).SqMagnitude() >= Square(searchDistance_))
-	{
-		// 一定の距離以上になったら追跡前の状態へ
-		stateTime_ = 0.0f;
-		update_ = &EnemyBehavior::UpdateSearch;
+		if ((transform_->GetPos() - playerT_->GetPos()).SqMagnitude() <= Square(stopDistance_))
+		{
+			// 一定の距離になったら停止状態へ
+			stateTime_ = 0.0f;
+			update_ = &EnemyBehavior::UpdateStop;
+
+			// レーザーサイトを表示する
+			laserSight_->On();
+
+			// 銃を構えるアニメーションをセット
+			animetor_->SetNextAnimation(static_cast<int>(EnemyAnim::AttackGun), 0.5f);
+		}
+		else if ((transform_->GetPos() - playerT_->GetPos()).SqMagnitude() >= Square(searchDistance_))
+		{
+			// 一定の距離以上になったら追跡前の状態へ
+			stateTime_ = 0.0f;
+			update_ = &EnemyBehavior::UpdateSearch;
+
+			// 待機状態のアニメーションをセット
+			animetor_->SetNextAnimation(static_cast<int>(EnemyAnim::Wait), 0.5f);
+		}
 	}
 }
 
@@ -190,64 +236,161 @@ void EnemyBehavior::UpdateStop(ObjectManager& objectManager, float delta)
 	// 回転
 	Rotation(delta);
 
-	// 射撃
-	Shot(delta, objectManager);
-	
-	if ((transform_->GetPos() - playerT_->GetPos()).SqMagnitude() >= Square(stopDistance_))
+	if (!animetor_->GetAnimState()->IsBlend())
 	{
-		// 一定以上の距離になったら移動状態へ
-		stateTime_ = 0.0f;
-		update_ = &EnemyBehavior::UpdateMove;
-	}
+		// ブレンド終了時に来る
 
+		// 射撃
+		(this->*shot_)(objectManager, delta);
+		if ((transform_->GetPos() - playerT_->GetPos()).SqMagnitude() >= Square(stopDistance_))
+		{
+			// 一定以上の距離になったら移動状態へ
+			stateTime_ = 0.0f;
+			update_ = &EnemyBehavior::UpdateMove;
+			animetor_->SetNextAnimation(static_cast<int>(EnemyAnim::WalkHaveGun), 0.5f);
+			laserSight_->Off();
+		}
+	}
 }
 
 // 攻撃を受けた後の状態
 void EnemyBehavior::UpdateHit(ObjectManager& objectManager, float delta)
 {
 	// 後ろに下がる
-	transform_->Pos() += knockBackVec_ * (speed_) * delta;
-	if (collider_->IsGround() && stateTime_ >= hitTime_)
+	transform_->Pos() += knockBackVec_ * (speed_ * 0.5f * delta);
+	collider_->SetSpeed((delta * speed_));
+	collider_->SetMoveDir(knockBackVec_);
+
+	if (collider_->IsGround() && stateTime_ >= hitTime_ && !animetor_->GetAnimState()->IsBlend())
 	{
 		// 硬直時間分経ったら
+
+		// 時間をリセット
 		stateTime_ = 0.0f;
-		hitCombo_ = -1;
-		update_ = &EnemyBehavior::UpdateMove;
+
+		// 近接武器へ切り替え時の処理にする
+		update_ = &EnemyBehavior::UpdateGunToSword;
 		DebugLog("硬直終了");
 		// 3回攻撃を受けたら消滅
-		if (damageCnt_ >= 3)
+		if (damageCnt_ >= HpMax)
 		{
 			DebugLog("倒された");
+
+			if (!isTutorial_)
+			{
+				// 近接攻撃中だったら削除する
+				auto atkInfo = objectManager.GetComponent<ObjectInfo>(attackID_);
+				if (atkInfo.IsActive() && *attackID_ != 0ull)
+				{
+					atkInfo->Destory();
+				}
+			}
+			// 自信を破棄する
 			objectManager.GetComponent<ObjectInfo>(ownerId_)->Destory();
-			SoundProcess::PlayBackSound(SoundProcess::SOUNDNAME_SE::enemyDestroy, SoundProcess::GetVolume(), false);
+
+			// エフェクトを出す
+			auto id = objectManager.CreateFromFactory(FactoryID::FireExEffect, ownerId_, transform_->GetPos());
+			objectManager.Begin(id);
+
+			// SEを鳴らす
+			lpSooundPross.PlayBackSound(SOUNDNAME_SE::enemyDestroy,false);
 		}
+
+		// 武器切り替えアニメーション開始
+		animetor_->SetNextAnimation(static_cast<int>(EnemyAnim::GunToSword), 0.5f);
+
+	}
+}
+
+void EnemyBehavior::UpdateGunToSword(ObjectManager& objectManager, float delta)
+{
+	if (animetor_->GetAnimState()->IsEnd())
+	{
+		// 近接攻撃のアニメーションをセット
+		animetor_->SetNextAnimation(static_cast<int>(EnemyAnim::AttackSword), 0.5f);
+
+
+		// 近接攻撃の時のものに変更
+		update_ = &EnemyBehavior::UpdateAttackSword;
+
+		if (!isTutorial_)
+		{
+			// 近接攻撃のオブジェクトを生成
+			attackID_ = objectManager.CreateFromFactory(FactoryID::EnemyAttack, ownerId_, transform_->GetPos());
+			objectManager.GetComponent<EnemyAttackBehavior>(attackID_)->SetEnemyID(ownerId_);
+			objectManager.Begin(attackID_);
+		}
+	}
+}
+
+void EnemyBehavior::UpdateAttackSword(ObjectManager& objectManager, float delta)
+{
+	if (animetor_->GetAnimState()->IsEnd())
+	{
+		// アニメーション終了時
+
+		// 近接武器から銃に切り替えるアニメーションをする
+		animetor_->SetNextAnimation(static_cast<int>(EnemyAnim::SwordToGun), 0.5f);
+
+		// アップデート関数を近接武器から銃に切り替える時のものに変更変更
+		update_ = &EnemyBehavior::UpdateSwordToGun;
+
+		if (!isTutorial_)
+		{
+			// 近接攻撃のオブジェクトの処理
+			auto info = objectManager.GetComponent<ObjectInfo>(attackID_);
+			if (info.IsActive() && *attackID_ != 0ull)
+			{
+				info->Destory();
+				DebugLog("攻撃終了", *attackID_);
+			}
+
+			// 無効なものにしておく
+			attackID_ = {};
+		}
+	}
+}
+
+void EnemyBehavior::UpdateSwordToGun(ObjectManager& objectManager, float delta)
+{
+	if (!animetor_->GetAnimState()->IsBlend() && animetor_->GetAnimState()->IsEnd())
+	{
+		// ブレンドもアニメーションも終了したとき
+
+		// 銃を構えたアニメーションをセット
+		animetor_->SetNextAnimation(static_cast<int>(EnemyAnim::AttackGun), 0.5f);
+
+		// 停止状態のものに変更
+		update_ = &EnemyBehavior::UpdateStop;
 	}
 }
 
 // 回転処理
 void EnemyBehavior::Rotation(float delta)
 {
-	
-	rotTime_ -= delta;
-	if (rotTime_ >= 0.0f)
+	if (isRot_)
 	{
 		// 回転中だった時の処理
-		auto rot = Learp(targetRot_, startRot_,rotTime_/ turnTime_);
-		Vector3 lookVec{ std::cos(rot),0.0f, std::sin(rot) };
-		transform_->LookAt(lookVec);
-		return;
+		transform_->AddRotation({ 0.0f, Deg2Rad(60.0f) * rotSing_ * delta, 0.0f });
 	}
 
-
+	// ターゲットまでのベクトルを求める
 	auto targetVec{ playerT_->GetPos() - transform_->GetPos()};
+
+	// 前方方向を取得
 	auto forward{ transform_->GetForward() };
+
+	// 回転すべき角度を求める
 	auto rot = Square(std::atan2(targetVec.z, targetVec.x) - std::atan2(forward.z, forward.x));
 	if (rot > rotDeff)
 	{
 		// 回転すべき時
-		rotTime_ = turnTime_;
-		startRot_ = std::atan2(forward.z, forward.x);
-		targetRot_ = std::atan2(targetVec.z, targetVec.x);
+		isRot_ = true;
+		rotSing_ = Cross(Vector2{ forward.z, forward.x }, Vector2{ targetVec.z,targetVec.x }) > 0.0f ? 1.0f: -1.0f;
+	}
+	else
+	{
+		isRot_ = false;
 	}
 }
 
@@ -257,17 +400,17 @@ void EnemyBehavior::Gravity(float delta)
 	if (!collider_->IsGround())
 	{
 		// 空中にいる時
-		jumpTime += delta;
-		float val = (v0 *jumpTime) - (0.5f * gravity * Square(jumpTime));
+		jumpTime_ += delta;
+		float val = (v0 *jumpTime_) - (0.5f * gravity * Square(jumpTime_));
 		transform_->Pos() += transform_->GetUp() * (val);
 		collider_->SetGravityPow(val);
 	}
 	else
 	{
-		jumpTime = 0.0f;
+		jumpTime_ = 0.0f;
 	}
-	//DebugDrawString("x=", transform_->GetPos().x, "y=", transform_->GetPos().y, "z=", transform_->GetPos().z, "veclocity=", jumpTime);
 }
+
 
 // ヒット時の処理
 void EnemyBehavior::OnHit(Collider& col, ObjectManager& objectManager)
@@ -275,43 +418,80 @@ void EnemyBehavior::OnHit(Collider& col, ObjectManager& objectManager)
 	auto atr = objectManager.GetComponent<ObjectInfo>(col.GetOwnerID())->GetAttribute();
 	if (atr == ObjectAttribute::PlayerAttack)
 	{
-		auto attack = objectManager.GetComponent<PlayerAttackBehavior>(col.GetOwnerID());
 		auto player = (objectManager.GetComponent<PlayerBehavior>(objectManager.GetPlayerID()));
-		if (hitCombo_ == attack->GetComboNum())
+		if (!player.IsActive())
 		{
-			// 同じ攻撃なので処理しない
-			//DebugLog("同じ攻撃");
+			// プレイヤーがアクティブ出ないとき処理しない
 			return;
 		}
 
-		if (damageCnt_ >= 3)
+		if (hitCombo_ == player->GetAtkCnt())
+		{
+			// 同じ攻撃なので処理しない
+			return;
+		}
+		if (damageCnt_ >= HpMax)
 		{
 			// もうすでに死亡しているので処理しない
 			return;
 		}
-		DebugLog("攻撃通る");
 
 		// 攻撃を受けたときの処理
-		//DebugLog("攻撃を受けた!EnemyCombo=", hitCombo_, "AttackCombo=", attack->GetComboNum(), update_ == &EnemyBehavior::UpdateHit);
+		hitCombo_ = player->GetAtkCnt();
 		damageCnt_++;
 		player->RiseSkillValue();
 		player->AddCombo();
 
-		update_ = &EnemyBehavior::UpdateHit;
-		stateTime_ = 0.0f;
-		hitCombo_ = attack->GetComboNum();
+		// 当たり判定との中点にエフェクトを生成する
+		auto hit = objectManager.GetComponent<Transform>(col.GetOwnerID());
+		auto effect = objectManager.CreateFromFactory(FactoryID::HitEffect, ownerId_ ,(hit->GetPos() + transform_->GetPos()) / 2.0f);
+		objectManager.GetComponent<Transform>(effect)->Scale() = Vector3{ 0.5f,0.5f,0.5f };
+		objectManager.Begin(effect);
 
-		jumpTime = 0.0f;
-		collider_->SetGroundFlag(false);
-		transform_->Pos().y += 2.0f;
-		objectManager.StartHitStop(0.05f);
-		auto playerTransform = (objectManager.GetComponent<Transform>(objectManager.GetPlayerID()));
-		if (playerTransform.IsActive())
-		{
-			knockBackVec_ = (transform_->GetPos() - playerTransform->GetPos());
-			knockBackVec_.y = 0.0f;
-			knockBackVec_.Normalize();
-		}
-		SoundProcess::PlayBackSound(SoundProcess::SOUNDNAME_SE::playerAttackHit,SoundProcess::GetVolume(),false);
+		// ノックバックさせる
+		KnockBack(objectManager);
 	}
+	else if (atr == ObjectAttribute::PlayerSkill)
+	{
+		if (damageCnt_ >= HpMax)
+		{
+			// もうすでに死亡しているので処理しない
+			return;
+		}
+		// 一撃撃破
+		damageCnt_ += HpMax;
+
+		// ノックバックさせる
+		KnockBack(objectManager);
+	}
+}
+
+void EnemyBehavior::KnockBack(ObjectManager& objectManager)
+{
+	// 攻撃を受けた時のものに変更
+	update_ = &EnemyBehavior::UpdateHit;
+	stateTime_ = 0.0f;
+
+	// ジャンプさせる
+	jumpTime_ = 0.0f;
+	collider_->SetGroundFlag(false);
+	transform_->Pos().y += 2.0f;
+
+	// 死亡していたらヒットストップを多めにする
+	objectManager.StartHitStop(damageCnt_ >= HpMax ? 0.12f : 0.05f);
+
+	// プレイヤーの座標からノックバックすべき方向を求める
+	auto playerTransform = (objectManager.GetComponent<Transform>(objectManager.GetPlayerID()));
+	if (playerTransform.IsActive())
+	{
+		knockBackVec_ = (transform_->GetPos() - playerTransform->GetPos());
+		knockBackVec_.y = 0.0f;
+		knockBackVec_.Normalize();
+	}
+
+	// 攻撃を受けた時のアニメーションをセット
+	animetor_->SetNextAnimation(static_cast<int>(EnemyAnim::GetHit), 0.125f);
+
+	// 攻撃を受けた時のSEを鳴らす
+	lpSooundPross.PlayBackSound(SOUNDNAME_SE::playerAttackHit,false);
 }

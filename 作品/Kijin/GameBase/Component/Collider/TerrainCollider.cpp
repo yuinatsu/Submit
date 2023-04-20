@@ -1,5 +1,5 @@
 #include "TerrainCollider.h"
-#include "../../Application.h"
+#include "../../SceneManager.h"
 #include "../../Object/ObjectManager.h"
 #include "../../Common/ResourceMng.h"
 
@@ -14,11 +14,8 @@ void TerrainCollider::Update(BaseScene& scene, ObjectManager& objectManager, flo
 
 void TerrainCollider::Begin(ObjectManager& objectManager)
 {
-	render_ = objectManager.GetComponent<ModelRender>(ownerId_);
 	//MV1SetRotationXYZ(*handel_, VGet(0.0f, Deg2Rad(180.0f), 0.0f));
 	MV1SetupCollInfo(*handel_,-1,64,16,64,-1);
-	MV1SetupCollInfo(*ground_);
-
 }
 
 void TerrainCollider::End(ObjectManager& objectManager)
@@ -26,7 +23,6 @@ void TerrainCollider::End(ObjectManager& objectManager)
 	Collider::End(objectManager);
 	
 	MV1TerminateCollInfo(*handel_);
-	MV1TerminateCollInfo(*ground_);
 }
 
 const int TerrainCollider::GetHandle(void) const
@@ -36,13 +32,9 @@ const int TerrainCollider::GetHandle(void) const
 
 void TerrainCollider::Load(const std::filesystem::path& path)
 {
-	lpResourceMng.LoadModel(handel_, path);
+	lpSceneMng.GetResourceMng().LoadModel(handel_, path);
 }
 
-void TerrainCollider::LoadGround(const std::filesystem::path& path)
-{
-	lpResourceMng.LoadModel(ground_, path);
-}
 
 #ifdef _DEBUG
 void TerrainCollider::DrawDebug(void)
@@ -74,7 +66,7 @@ bool TerrainCollider::Check(CapsuleCollider& col, ObjectManager& objectManager)
 
 bool TerrainCollider::Check(SphereCollider& col, ObjectManager& objectManager)
 {
-	return Collider::HitCheck(col,*this);
+	return Collider::HitCheck(col,*this,objectManager);
 }
 
 bool TerrainCollider::Check(MeshCollider& col, ObjectManager& objectManager)

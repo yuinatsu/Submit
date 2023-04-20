@@ -41,10 +41,12 @@ bool ClearTrans::UpdataTransition(double delta)
 
 void ClearTrans::UpdateZoom(double delta)
 {
+	// ズーム中
 	if (zoomExt_ < 2.0f)
 	{
 		zoomExt_ += delta;
 	}
+	// 一定のカメラワークになったら
 	if ((Math::Vector2I)distance_ >= (-((Math::Vector2I)zoomPos_) - 2) && (Math::Vector2I)distance_ <= (-((Math::Vector2I)zoomPos_) + 2))
 	{
 		effectF_ = true;

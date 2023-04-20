@@ -37,9 +37,6 @@ void BlendTrans::DrawOwnScreen(float delta)
 	// “§–¾‚É‚·‚éŒvŽZ
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255 - alpha);
 	beforScene_->Draw(Math::Vector2I(200,0), addExt_, -0.05);
-	// F‚ð‚Â‚¯‚é
-	//SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
-	//afterScene_->Draw(addExt_, 0.1f);
 	// ‚¸‚Á‚Æ—LŒø‚É‚È‚Á‚Ä‚µ‚Ü‚¤‚Ì‚Å–³Œø‚É‚·‚é–½—ß
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 }

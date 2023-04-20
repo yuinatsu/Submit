@@ -14,8 +14,6 @@ enum class OSELECT
 	Max,
 };
 
-
-
 class OptionScene :
 	public BaseScene
 {
@@ -90,8 +88,6 @@ private:
 
 	// 更新処理のメンバ関数ポインタ
 	uniqueScene(OptionScene::* update_)(float, uniqueScene);
-
-
 
 	// 描画処理のメンバ関数ポインタ
 	void (OptionScene::* draw_)(void);

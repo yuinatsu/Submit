@@ -2,6 +2,7 @@
 #include <algorithm>
 #include "Vector2.h"
 #include "Vector3.h"
+#include "Quaternion.h"
 
 
 // Vector2Tmpのx=0,y=0を表す定数
@@ -24,24 +25,31 @@ constexpr Vector2Tmp<T> rightVector2{ static_cast<T>(1),static_cast<T>(0) };
 template<ValueC T>
 constexpr Vector2Tmp<T> leftVector2{ static_cast<T>(-1),static_cast<T>(0) };
 
+// Vector3Tmpのx=0,y=0,z=0を表す定数
 template<ValueC T>
 constexpr Vector3Tmp<T> zeroVector3{ static_cast<T>(0),static_cast<T>(0) ,static_cast<T>(0) };
 
+// Vector3Tmpの上方向を表す定数
 template<ValueC T>
 constexpr Vector3Tmp<T> upVector3{ static_cast<T>(0),static_cast<T>(1) ,static_cast<T>(0) };
 
+// Vector3Tmpの下方向を表す定数
 template<ValueC T>
 constexpr Vector3Tmp<T> downVector3{ static_cast<T>(0),static_cast<T>(-1) ,static_cast<T>(0) };
 
+// Vector3Tmpの前方方向を表す定数
 template<ValueC T>
 constexpr Vector3Tmp<T> forwardVector3{ static_cast<T>(0),static_cast<T>(0) ,static_cast<T>(1) };
 
+// Vector3Tmpの後方方向を表す定数
 template<ValueC T>
 constexpr Vector3Tmp<T> backVector3{ static_cast<T>(0),static_cast<T>(0) ,static_cast<T>(-1) };
 
+// Vector3Tmpの左方向を表す定数
 template<ValueC T>
 constexpr Vector3Tmp<T> leftVector3{ static_cast<T>(-1),static_cast<T>(0) ,static_cast<T>(0) };
 
+// Vector3Tmpの右方向を表す定数
 template<ValueC T>
 constexpr Vector3Tmp<T> rightVector3{ static_cast<T>(1),static_cast<T>(0) ,static_cast<T>(0) };
 
@@ -68,6 +76,12 @@ constexpr T Dot(const Vector2Tmp<T>& lVec, const Vector2Tmp<T>& rVec)
 	return lVec.x * rVec.x + lVec.y * rVec.y;
 }
 
+/// <summary>
+/// 内積(Vector3用)
+/// </summary>
+/// <param name="lVec"></param>
+/// <param name="rVec"></param>
+/// <returns></returns>
 template<ValueC T>
 constexpr T Dot(const Vector3Tmp<T>& lVec, const Vector3Tmp<T>& rVec)
 {
@@ -86,6 +100,12 @@ constexpr T Cross(const Vector2Tmp<T>& lVec, const Vector2Tmp<T>& rVec)
 	return lVec.x * rVec.y - lVec.y * rVec.x;
 }
 
+
+template<ValueC T>
+constexpr Vector3Tmp<T> Cross(const Vector3Tmp<T>& lVec, const Vector3Tmp<T>& rVec)
+{
+	return { std::fma(lVec.y, rVec.z,-(lVec.z * rVec.y)),std::fma(lVec.z , rVec.x,-(lVec.x * rVec.z)), std::fma(lVec.x, rVec.y, -(lVec.y * rVec.x)) };
+}
 
 // 円周率
 template<ValueC T>
@@ -129,9 +149,33 @@ float GetNormalizedAngle(float angle, float valMin = 0.0f, float valMax = pi2<fl
 double GetNormalizedAngle(double angle, double valMin = 0.0f, double valMax = pi2<double>);
 
 float DirNearAroundRad(float from, float to);
-float RadIn2PI(float rad);
+
+MATRIX ToMatrix(Quaternion& q);
+
+Quaternion ToQuaternion(MATRIX& m);
+Quaternion ToQuaternion(Vector3& e);
+
+Vector3 ToEuler(MATRIX& m);
+Vector3 ToEuler(Quaternion& q);
+
+template<class T>
+constexpr T RadIn2PI(const T& rad)
+{
+	T tmp = std::fmod(rad, pi<T> *static_cast<T>(2));
+	if (tmp < static_cast<T>(0))
+	{
+		tmp += pi<T> *static_cast<T>(2);
+	}
+	return tmp;
+}
 	
-//
+/// <summary>
+/// クランプする
+/// </summary>
+/// <param name="val"> 対象の値 </param>
+/// <param name="minVal"> 最小値(デフォルト0) </param>
+/// <param name="maxVal"> 最大値(デフォルト1) </param>
+/// <returns></returns>
 constexpr float Clamp(float val, float minVal = 0, float maxVal = 1)
 {
 	return std::clamp(val,minVal,maxVal);
@@ -186,7 +230,7 @@ constexpr Vector3Tmp<T> Learp(const Vector3Tmp<T>& a, const Vector3Tmp<T>& b, co
 	return a + ((b - a) * t);
 }
 
-	
+
 /// <summary> Vector2TmpをClampする </summary>
 /// <param name="val"> Clampしたい値 </param>
 /// <param name="min"> 最小値 </param>
@@ -208,3 +252,4 @@ constexpr Vector3Tmp<T> Clamp(const Vector3Tmp<T>& val, const Vector3Tmp<T>& min
 {
 	return { std::clamp(val.x,min.x,max.x),std::clamp(val.y,min.y,max.y),std::clamp(val.z,min.z,max.z) };
 }
+

@@ -54,7 +54,6 @@ void Box::Init(void)
 void Box::Draw(const Vector2& drawoffset, DrawMng& drawMng)
 {
 	drawMng.Draw(pos_ + drawoffset, 0.0f, lpImageMng.GetID(imgKey_)[(flag_ == true ? 1:0)]);
-	//DrawRotaGraph(static_cast<int>(pos_.x + drawoffset.x), static_cast<int>(pos_.y + drawoffset.y), 1.0, 0.0, lpImageMng.GetID((flag_ == true ? openImg : closeImg))[0], true);
 }
 
 bool Box::GetFlag(void)

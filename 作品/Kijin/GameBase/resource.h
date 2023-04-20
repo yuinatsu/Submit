@@ -2,6 +2,9 @@
 // Microsoft Visual C++ generated include file.
 // Used by GameBase.rc
 
+#define IDI_ICON1                       101
+
+
 // 新しいオブジェクトの次の既定値
 // 
 #ifdef APSTUDIO_INVOKED

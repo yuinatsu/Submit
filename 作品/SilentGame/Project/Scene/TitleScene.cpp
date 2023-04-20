@@ -20,7 +20,6 @@ constexpr float endWndActTime{ 0.25f };
 TitleScene::TitleScene()
 {
 	Init();
-	//DrawOwnScreen(0.0);
 }
 
 TitleScene::~TitleScene()
@@ -28,17 +27,6 @@ TitleScene::~TitleScene()
 	DeleteGraph(blendGraph_);
 	DeleteGraph(blendNozeGraph_);
 	DeleteGraph(endWndScreenH_);
-	//lpImageMng.Relese("Keydata");
-	//lpImageMng.Relese("PadPS");
-	//lpImageMng.Relese("PadXbox");
-	//lpImageMng.Relese("bg");
-	//lpImageMng.Relese("buildings");
-	//lpImageMng.Relese("far-buildings");
-	//lpImageMng.Relese("skill-foreground");
-	//lpImageMng.Relese("fogBG");
-	//lpImageMng.Relese("fog");
-	//lpImageMng.Relese("dummy");
-	//lpImageMng.Relese("Sneaking_Mittion");
 }
 
 void TitleScene::SoundPlay(void)
@@ -323,7 +311,6 @@ void TitleScene::DrawOpenEnd(float delta)
 		endWndPos.x + endWndSize.x, (endWndPos.y + endWndSize.y) - static_cast<int>(endWndSize.y/2 * w),
 		endWndPos.x, (endWndPos.y + endWndSize.y) - static_cast<int>(endWndSize.y / 2 * w),
 		endWndScreenH_, true);
-	//DrawGraph(endWndPos.x, endWndPos.y, endWndScreenH_, true);
 	DrawKeyLR();
 }
 
@@ -372,7 +359,6 @@ void TitleScene::DrawBG(void)
 	}
 	skill_foreground_ += 3;
 	DrawGraph(0, 0, lpImageMng.GetID("fogBG")[0], true);
-	//DrawGraph(0, 0, lpImageMng.GetID("fog")[0], true);
 }
 
 void TitleScene::DrawKeyUD(void)
@@ -393,7 +379,6 @@ void TitleScene::DrawKeyUD(void)
 	}
 	else
 	{
-		//DrawFormatString(775, 425, 0xffffff, "–ß‚éF");
 		DrawGraph(875, 600, lpImageMng.GetID("./Resource/Image/Option/decision.png")[0], true);
 		DrawGraph(950, 600, paddata[lpConfigMng.GetJoypadInputCode().at(InputID::Attack)], true);
 	}
@@ -417,7 +402,6 @@ void TitleScene::DrawKeyLR(void)
 	}
 	else
 	{
-		//DrawFormatString(775, 425, 0xffffff, "–ß‚éF");
 		DrawGraph(875, 600, lpImageMng.GetID("./Resource/Image/Option/decision.png")[0], true);
 		DrawGraph(950, 600, paddata[lpConfigMng.GetJoypadInputCode().at(InputID::Attack)], true);
 	}
@@ -429,10 +413,7 @@ void TitleScene::DrawConfirmation(void)
 	DxLib::ClsDrawScreen();
 	DrawGraph(0, 0, lpImageMng.GetID("./Resource/Image/TitleScene/End.png")[0], true);
 	tstUICtrl_->Draw();
-
 }
-
-
 
 void TitleScene::Relese(void)
 {

@@ -33,8 +33,8 @@ public:
 protected:
     bool Init(void) override;
     /// <summary> スクリーンや描画周りの初期化 </summary>
-/// <param name=""></param>
-/// <returns></returns>
+    /// <param name=""></param>
+    /// <returns></returns>
     virtual bool InitScreen(void);
 
     /// <summary> ゲームにかかわる初期化 </summary>

@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <string>
 #include "../InputID.h"
+#include "../../../Shader/PEID.h"
 
 #define lpConfigMng (InputConfig::GetInstance())
 
@@ -12,6 +13,7 @@ using InputCode = std::map<InputID, int>;
 class InputConfig
 {
 	using TypeDataTbl = std::unordered_map<int, std::pair<std::string, void(InputConfig::*)(void)>>;
+	using PeConfig = std::unordered_map<PEID, bool>;
 public:
 	static void Create(void);
 	static void Destroy(void);
@@ -57,8 +59,43 @@ public:
 	{
 		return nowType_;
 	}
+
+	/// <summary>
+	/// ポストエフェクトのコンフィグの取得
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
+	const PeConfig& GetPeConfig(void) const&;
+
+	/// <summary>
+	/// ポストエフェクトのフラグをセットする
+	/// </summary>
+	/// <param name="id"></param>
+	/// <param name="flag"></param>
+	void SetPeConfig(PEID id, bool flag);
+
+	/// <summary>
+	/// カメラのスピードをセットする
+	/// </summary>
+	/// <param name="speed"></param>
+	void SetCameraSpeed(float speed)
+	{
+		camSpeed_ = speed;
+	}
+
+	/// <summary>
+	/// カメラのスピードを取得する
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
+	float GetCameraSpeed(void) const
+	{
+		return camSpeed_;
+	}
 private:
 	InputConfig();
+	void InitSound();
+	void InitInput();
 	~InputConfig();
 	InputConfig(const InputConfig&) = delete;
 	void operator=(const InputConfig&) = delete;
@@ -93,6 +130,12 @@ private:
 
 	// 現在の入力タイプ
 	int nowType_;
+
+	// ポストエフェクト用コンフィグ
+	PeConfig peConfig_;
+
+	// カメラの感度
+	float camSpeed_;
 
 	// タイプ別に設定ファイル名とデフォルトに戻す関数をまとめたテーブル
 	static TypeDataTbl typeDataTbl_;

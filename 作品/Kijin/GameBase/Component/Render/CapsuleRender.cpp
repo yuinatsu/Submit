@@ -3,7 +3,8 @@
 #include "../../Object/ObjectManager.h"
 #include "CapsuleRender.h"
 
-CapsuleRender::CapsuleRender() 
+CapsuleRender::CapsuleRender() :
+	color_{0xffffff}, height_{0.0f}, radius_{0.0f}
 {
 }
 
@@ -11,18 +12,12 @@ CapsuleRender::~CapsuleRender()
 {
 }
 
-
-void CapsuleRender::Draw(void)
-{
-	DrawCapsule3D(VGet(top_.x,top_.y, top_.z), VGet(bottom_.x,bottom_.y, bottom_.z), radius_, 64, color_, color_, true);
-}
-
 void CapsuleRender::Draw(int shadowMap, int buff)
 {
 	DrawCapsule3D(VGet(top_.x, top_.y, top_.z), VGet(bottom_.x, bottom_.y, bottom_.z), radius_, 64, color_, color_, true);
 }
 
-void CapsuleRender::SetUpShadowMap(void)
+void CapsuleRender::SetUpDepthTex(int ps, int buff)
 {
 }
 

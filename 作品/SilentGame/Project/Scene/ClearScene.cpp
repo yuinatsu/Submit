@@ -135,19 +135,6 @@ void ClearScene::DrawOwnScreen(float delta)
 	drawFunc_(delta);
 }
 
-//uniqueScene ClearScene::UpdateStart(float delta, uniqueScene ownScene)
-//{
-//	camera_.Update(delta);
-//	if (camera_.GetMode() == CamMode::Trace)
-//	{
-//		startedFlag_ = true;
-//		updateFunc_ = std::bind(&ClearScene::GameUpdate, this, std::placeholders::_1, std::placeholders::_2);
-//	}
-//	objMng_->UpdateStart(delta);
-//	DrawOwnScreen(delta);
-//	return ownScene;
-//}
-
 uniqueScene ClearScene::GameUpdate(float delta, uniqueScene ownScene)
 {
 	controller_->Update(delta);
@@ -177,8 +164,6 @@ uniqueScene ClearScene::UpdateGameEnd(float delta, uniqueScene ownScene)
 {
 	uiMng_->Update(delta, objMng_);
 
-	//gEvent_->StartAlert();
-
 	controller_->Update(delta);
 	DrawOwnScreen(delta);
 	objMng_->UpdateGameEnd(delta);
@@ -193,8 +178,6 @@ uniqueScene ClearScene::UpdateGameEnd(float delta, uniqueScene ownScene)
 	else
 	{
 		SoundProcess::SoundStop(SoundProcess::SOUNDNAME_SE::waring);
-		// ゲームオーバー時シーン移行
-		//return std::make_unique<DeadTrans>(objMng_, camera_.GetOffset(), *drawMng_, std::move(ownScene), std::make_unique<ResultScene>(*resultData_, mapNum_));
 	}
 	return ownScene;
 }
@@ -215,7 +198,6 @@ void ClearScene::DrawGame(float delta)
 	DrawGraph(50, 60, viewID_, true);
 
 	DrawGraph(0, 0, lpImageMng.GetID("fog")[0], true);
-	// DrawGraph(0, 0, lpImageMng.GetID("fogBG")[0], true);
 
 	uiMng_->Draw(delta);
 
@@ -261,7 +243,6 @@ void ClearScene::DrawMap(void)
 			{
 				Math::Vector2 drawPos{ static_cast<float>(x) * tileSize.x , static_cast<float>(y) * tileSize.y };
 				drawPos += drawOffset;
-				//drawMng_->Draw(drawPos, (tileSize / 2), lpImageMng.GetID(map_)[gid]);
 				drawMng_->Draw(drawPos, lpImageMng.GetID(map_)[gid]);
 			}
 		}

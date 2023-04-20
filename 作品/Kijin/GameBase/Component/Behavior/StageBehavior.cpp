@@ -1,23 +1,62 @@
 #include "StageBehavior.h"
 #include "../../Object/ObjectManager.h"
+#include "../../Component/Transform/Transform.h"
+#include "../../Common/SoundPross.h"
 #include "../../Scene/GameScene.h"
 
-StageBehavior::StageBehavior() :
-	enemyCount_{0u}
+
+
+StageBehavior::StageBehavior(std::map<size_t, Vector2>&& posList):
+	enemyPosList_{std::move(posList)}
 {
 }
 
-void StageBehavior::SubEnemy(void)
+StageBehavior::StageBehavior()
 {
-	enemyCount_--;
+}
+
+void StageBehavior::SubEnemy(ObjectID& id)
+{
+	enemyPosList_.erase(*id);
+}
+
+const std::map<size_t, Vector2>& StageBehavior::GetEnemyPosList(void) const&
+{
+	return enemyPosList_;
 }
 
 void StageBehavior::Update(BaseScene& scene, ObjectManager& objectManager, float delta, Controller& controller)
 {
-	if (enemyCount_ <= 0)
+	// ìGÇÃç¿ïWÇÃÉäÉXÉgÇçXêV
+	UpdateEnemyPosList(objectManager);
+
+	if (enemyPosList_.size() <= 0)
 	{
 		// ìGÇÇ∑Ç◊Çƒì|ÇµÇΩÇÃÇ≈ÉVÅ[ÉìÇïœÇ¶ÇÈ
 		scene.ChangeSceneID(SceneID::Result);
-		dynamic_cast<GameScene&>(scene).SetResult(ResultAttribute::Clear);
+		static_cast<GameScene&>(scene).SetResult(ResultAttribute::Clear);
+	}
+
+	auto player = (objectManager.GetComponent<Transform>(objectManager.GetPlayerID()));
+	if (!player.IsActive())
+	{
+		// ÉQÅ[ÉÄÉIÅ[ÉoÅ[
+		static_cast<GameScene&>(scene).SetResult(ResultAttribute::GameOver);
+		scene.ChangeSceneID(SceneID::Result);
+		lpSooundPross.Release();
+	}
+}
+
+void StageBehavior::UpdateEnemyPosList(ObjectManager& objectManager)
+{
+	for (auto& pair : enemyPosList_)
+	{
+		auto trans = objectManager.GetComponent<Transform>(ObjectID{ pair.first });
+		if (trans.IsActive())
+		{
+			// ìGÇÃç¿ïWÇäiî[Ç∑ÇÈ
+			pair.second.x = trans->GetPos().x;
+			pair.second.y = trans->GetPos().z;
+		}
 	}
 }

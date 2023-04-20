@@ -10,6 +10,7 @@
 
 class ObjectManager;
 class Controller;
+class BaseScene;
 
 class UiBase
 {
@@ -17,10 +18,10 @@ public:
 	UiBase(const Vector2& pos);
 	virtual ~UiBase() = default;
 
-	virtual void Update(float delta, ObjectManager& objMng, Controller& controller) = 0;
-	virtual void Draw() = 0;
+	virtual void Update(float delta, BaseScene& scene,ObjectManager& objMng, Controller& controller) = 0;
+	virtual void Draw(int mainScr) = 0;
 	virtual UiID GetUIID(void) = 0;
-	virtual void Loaded(void);
+	virtual void Loaded(BaseScene& scene);
 
 	/// <summary>
 	/// ボタンとして機能するか(ButtonBaseを継承しているか？)
@@ -51,11 +52,25 @@ public:
 	{
 		return size_;
 	}
+
+	/// <summary>
+	/// 描画すべきかのフラグをセットする
+	/// </summary>
+	/// <param name="flag"></param>
+	void SetDrawFlag(bool flag)
+	{
+		isDraw_ = flag;
+	}
+
+
 protected:
 	// 座標
 	Vector2 pos_;
 
 	// サイズ
 	Vector2 size_;
+
+	// 描画すべきかのフラグ
+	bool isDraw_;
 };
 

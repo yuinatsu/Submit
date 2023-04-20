@@ -1,5 +1,4 @@
 #pragma once
-#include <thread>
 #include <mutex>
 #include <list>
 #include <functional>
@@ -39,13 +38,10 @@ public:
 	/// <param name=""></param>
 	void WaitAllTask(void);
 
-	void GetTask(Worker& woerker);
+	bool GetTask(Worker& woerker);
 
 
 private:
-
-	// スレッド
-	std::jthread thread_;
 
 	// ミューテックス
 	std::mutex mutex_;
@@ -53,7 +49,7 @@ private:
 	// 実行するタスク
 	std::list<std::function<void(void)>> taskList_;
 
-
+	// 作業スレッドクラスを複数持つ
 	std::vector<std::unique_ptr< Worker>> workers_;
 };
 

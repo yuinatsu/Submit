@@ -122,7 +122,7 @@ private:
     float AlarmTime_;
     bool loopFlag_;
 
-    // マップが小さいか?
+    // マップが小さいか
     bool isSmallMap_;
 
     // fogやアラートの色のエフェクト

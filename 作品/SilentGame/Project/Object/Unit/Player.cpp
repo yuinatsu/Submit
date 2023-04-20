@@ -74,36 +74,18 @@ void Player::Update(float delta)
 	// アニメーション状態
 	if (isIdle_)
 	{
-		//DebugLog("止まった");
-		if (oldSpMag_ == 0.4f)
-		{
-			//SoundProcess::SoundStop(SoundProcess::SOUNDNAME_SE::crouch);
-		}
-		else if (oldSpMag_ == 0.8f)
-		{
-			//SoundProcess::SoundStop(SoundProcess::SOUNDNAME_SE::run);
-		}
-		else
-		{
-			SoundProcess::SoundStop(SoundProcess::SOUNDNAME_SE::walk);
-		}
+		SoundProcess::SoundStop(SoundProcess::SOUNDNAME_SE::walk);
 		oldSpMag_ = 0.0f;
 	}
 	else if (oldSpMag_ != spMag_ && spMag_ != 0.0f)
 	{
-		//DebugLog("変わった");
 		SoundProcess::SoundStop(SoundProcess::SOUNDNAME_SE::walk);
-		//SoundProcess::SoundStop(SoundProcess::SOUNDNAME_SE::run);
-		//SoundProcess::SoundStop(SoundProcess::SOUNDNAME_SE::crouch);
 		if (spMag_ == 0.4f)
 		{
-			//SoundProcess::PlayBackSound(SoundProcess::SOUNDNAME_SE::crouch, SoundProcess::GetVolume(), true);
 			spMagName_ = "PlayerCrouch";
 		}
 		else if (spMag_ == 0.8f)
 		{
-			//DebugLog("走る");
-			//SoundProcess::PlayBackSound(SoundProcess::SOUNDNAME_SE::run, SoundProcess::GetVolume(), true);
 			spMagName_ = "PlayerDash";
 		}
 		else
@@ -120,7 +102,6 @@ void Player::Draw(const Math::Vector2& offset, DrawMng& drawMng)
 {
 	// プレイヤー表示
 	dynamic_cast<Animation&>(GetComponent(ComponentID::Animator)).Draw(drawMng, pos_ + offset, isIdle_, spMagName_);
-	//DrawLine(pos_.x + offset.x, pos_.y + offset.y, dbgTmpPos_.x + offset.x, dbgTmpPos_.y + offset.y, 0xffffff, 2);
 
 	// ノーマルマップ
 	// 定数バッファの確保
@@ -129,5 +110,4 @@ void Player::Draw(const Math::Vector2& offset, DrawMng& drawMng)
 
 	UpdateShaderConstantBuffer(cBuff);
 	SetShaderConstantBuffer(cBuff, DX_SHADERTYPE_PIXEL, 0);
-	//MyDrawGraph(pos_.x + offset.x,pos_.y + offset.y,);
 }

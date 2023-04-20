@@ -10,6 +10,7 @@
 #include "ObjectID.h"
 #include "../Component/ComponentID.h"
 #include "../Common/Vector3.h"
+#include "../Component/Info/ObjectAttribute.h"
 
 class BaseScene;
 class ObjectManager;
@@ -37,18 +38,17 @@ public:
 	void Update(float delta, Controller& controller, BaseScene& scene);
 
 	/// <summary>
-	/// 描画
+	/// シャドウマップを考慮して描画する
 	/// </summary>
-	/// <param name=""></param>
-	void Draw(void);
-	
-	void ShadowDraw(int shadowMap,int buff);
+	/// <param name="shadowMap"></param>
+	/// <param name="buff"></param>
+	void ShadowDraw(int shadowMap = -1,int buff = -1);
 
 	/// <summary>
-	/// シャドウマップを作成
+	/// 深度テクスチャを作成
 	/// </summary>
-	/// <param name=""></param>
-	void SetupShadowMap(void);
+	/// <param name="ps">深度作成用のピクセルシェーダ</param>
+	void SetupDepthTex(int ps = -1,int buffer = -1);
 
 	/// <summary>
 	/// 指定オブジェクトIDのコンポーネントを取得
@@ -175,6 +175,25 @@ public:
 	}
 
 	/// <summary>
+	/// プレイヤー攻撃のID
+	/// </summary>
+	/// <param name="id"></param>
+	void SetPlayerAttackID(ObjectID id)
+	{
+		playerAttackID_ = id;
+	}
+
+	/// <summary>
+	/// プレイヤー攻撃IDの取得
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
+	ObjectID& GetPlayerAttackID(void)
+	{
+		return playerAttackID_;
+	}
+
+	/// <summary>
 	/// エネミーのID
 	/// </summary>
 	/// <param name="id"></param>
@@ -200,16 +219,58 @@ public:
 	/// </summary>
 	/// <param name="stopTime"></param>
 	void StartHitStop(const float stopTime);
+
+	/// <summary>
+	/// アトリビュートに一致するオブジェクトを探す
+	/// </summary>
+	/// <param name="atr"> 探したいオブジェクトのアトリビュート </param>
+	std::pair<bool, ObjectID> Find(ObjectAttribute atr);
+
+
+	/// <summary>
+	/// カメラ制御オブジェクトのIDをセットする
+	/// </summary>
+	/// <param name="id"></param>
+	void SetCameraID(ObjectID& id)
+	{
+		cameraID_ = id;
+	}
+
+	/// <summary>
+	/// カメラ制御オブジェクトのIDを取得する
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
+	ObjectID& GetCameraID(void)&
+	{
+		return cameraID_;
+	}
+
+	ObjectID& GetStageID(void)&
+	{
+		return stageID_;
+	}
+
+	void SetStageID(ObjectID& id)
+	{
+		stageID_ = id;
+	}
 private:
 
 	// プレイヤーのID
 	ObjectID playerID_;
 
+	// プレイヤー攻撃のID
+	ObjectID playerAttackID_;
+
 	// エネミーのID
 	ObjectID enemyID_;
 
+	// カメラ制御用
+	ObjectID cameraID_;
+
 	// コンポーネントをマップで持つ
-	std::unordered_map<ComponentID, ComponentMap > componentMap_;
+	std::map<ComponentID, ComponentMap > componentMap_;
 
 	// 生成用クラス
 	std::map<FactoryID, std::unique_ptr<Factory>> factoryMap_;
@@ -225,6 +286,9 @@ private:
 
 	// ミューテックス
 	std::mutex mutex_;
+
+	// ステージのID
+	ObjectID stageID_;
 };
 
 template<CompC T>

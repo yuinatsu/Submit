@@ -28,9 +28,6 @@ void SceneMng::Run(void)
 	}
 	CreateMaskScreen();
 	scene_ = std::make_unique<TitleScene>();
-	//scene_ = std::make_unique<SelectScene>();
-	//scene_ = std::make_unique<LoadScene>(1.0f,std::make_unique<SelectScene>(),std::make_unique<GameScene>());
-	//scene_ = std::make_unique<GameScene>();
 
 	time_.DeltaTimeStart();
 	time_.DeltaTimeEnd();

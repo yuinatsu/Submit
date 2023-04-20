@@ -45,7 +45,6 @@ ObjManager::ObjManager(
 {
 	Load(objDataName, itemUi, gmkEvent, tmxObj);
 	CreateDoor(tmxObj);
-	//Load("Resource/test.data", itemUi, gmkEvent, tmxObj);
 	useItem_ = ItemName::Max;
 	effect_ = EffectName::Max;
 	pEnt_ = false;

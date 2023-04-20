@@ -12,6 +12,7 @@ class ResourceMng
 {
 	using HandleFlagPair = std::pair<std::shared_ptr<int>, bool>;
 	using HandleMap = std::map<std::uint64_t, HandleFlagPair>;
+	using HandleDivMap = std::map <std::uint64_t, std::tuple<std::vector<int>, std::shared_ptr<int>, bool>>;
 	using ScreenMap = std::map<ScreenID, HandleFlagPair>;
 	using ModelMap = std::map<std::uint64_t, std::tuple<std::shared_ptr<int>, bool>>;
 
@@ -27,6 +28,16 @@ public:
 	void LoadTexture(SharedGraphicHandle& out,const std::filesystem::path& path, bool isNotRelese = false);
 
 	/// <summary>
+	/// 画像の分割読み込み
+	/// </summary>
+	/// <param name="out"></param>
+	/// <param name="path"> 画像のfileパス </param>
+	/// <param name="divCount"></param>
+	/// <param name="divSize"></param>
+	/// <param name="isNotRelese"> Releseが呼ばれた時に削除しないか? </param>
+	void LoadDivTexture(SharedDivGraphicHandle& out, const std::filesystem::path& path, const Vector2I& divCount, const Vector2I& divSize, bool isNotRelese = false);
+
+	/// <summary>
 	/// 上記のMV1版
 	/// </summary>
 	/// <param name="path"></param>
@@ -39,6 +50,12 @@ public:
 	/// </summary>
 	/// <param name="handle"></param>
 	void Remove(SharedGraphicHandle& handle);
+
+	/// <summary>
+	/// 一致するグラフィックハンドルを管理から削除する
+	/// </summary>
+	/// <param name="handle"></param>
+	void Remove(SharedDivGraphicHandle& handle);
 
 	/// <summary>
 	/// レンダーターゲットを作成する
@@ -134,6 +151,7 @@ private:
 
 	// ロードしたパスをキーに解放すべきかのフラグとそれぞれのハンドルを持つ
 	HandleMap imageMap_;
+	HandleDivMap imageDivMap_;
 	ScreenMap screenMap_;
 	HandleMap soundMap_;
 	ModelMap modelMap_;

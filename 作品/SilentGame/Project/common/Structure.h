@@ -5,7 +5,6 @@
 #include "Math.h"
 #include "MapCollMng.h"
 
-//using namespace Math;
 
 struct Traiangle
 {

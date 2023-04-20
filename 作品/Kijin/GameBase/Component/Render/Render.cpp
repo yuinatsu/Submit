@@ -1,6 +1,11 @@
 #include "Render.h"
 #include "../../Object/ObjectManager.h"
 
+Render::Render() :
+	isDraw_{true}
+{
+}
+
 Render::~Render()
 {
 }

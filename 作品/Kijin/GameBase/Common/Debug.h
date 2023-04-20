@@ -329,7 +329,7 @@ inline void DebugClass::Out(const T& t, const A & ...a)
 
 #else
 
-#define DebugStart() 
+#define DebugStart(timeClass) 
 
 #define DebugSetUp() 
 
@@ -339,7 +339,7 @@ inline void DebugClass::Out(const T& t, const A & ...a)
 
 #define DebugOutput(...) 
 
-#define DebugInfoDraw(delta) 
+#define DebugInfoDraw() 
 
 // デバッグようにカプセルを描画する
 #define DebugDrawCapsule(top,btm,r,color)

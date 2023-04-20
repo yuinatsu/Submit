@@ -56,6 +56,31 @@ void ResourceMng::LoadMv1Texture(SharedGraphicHandle& out,const std::filesystem:
 	out.SetPtr(imageMap_[key].first);
 }
 
+void ResourceMng::LoadDivTexture(SharedDivGraphicHandle& out, const std::filesystem::path& path, const Vector2I& divCount, const Vector2I& divSize, bool isNotRelese)
+{
+	std::lock_guard<std::mutex> lock{ mutex_ };
+	auto key{ std::hash<std::string>()(path.string()) };
+	if (imageDivMap_.contains(key))
+	{
+		out.Set(std::get<0>(imageDivMap_[key]));
+		out.SetPtr(std::get<1>(imageDivMap_[key]));
+		return;
+	}
+	auto& vec{ std::get<0>(imageDivMap_[key]) };
+	auto& sPtr{ std::get<1>(imageDivMap_[key]) };
+	vec.resize(divCount.x * divCount.y);
+	sPtr = std::make_shared<int>();
+	int h{ LoadDivGraph(path.wstring().c_str(), divCount.x * divCount.y, divCount.x, divCount.y, divSize.x, divSize.y, vec.data()) };
+	if (h == -1)
+	{
+		DebugErrorLog("画像読み込み失敗");
+	}
+	std::get<2>(imageDivMap_[key]) = isNotRelese;
+	out.Set(vec);
+	*sPtr = *vec.begin();
+	out.SetPtr(sPtr);
+}
+
 
 void ResourceMng::Remove(SharedGraphicHandle& handle)
 {
@@ -70,7 +95,23 @@ void ResourceMng::Remove(SharedGraphicHandle& handle)
 	}
 }
 
+void ResourceMng::Remove(SharedDivGraphicHandle& handle)
+{
+	std::lock_guard<std::mutex> lock{ mutex_ };
+	auto itr = std::find_if(imageDivMap_.begin(), imageDivMap_.end(), [&handle](auto& img) {return *std::get<1>(img.second) == *handle; });
+	if (itr != imageDivMap_.end())
+	{
+		if (!std::get<2>(itr->second))
+		{
+			for (auto& h : std::get<0>(itr->second))
+			{
+				DeleteGraph(h);
+			}
+		}
+	}
 
+	imageDivMap_.erase(itr);
+}
 
 void ResourceMng::MakeRenderTarget(SharedRenderTargetHandle&  out, const ScreenID id, const Vector2& size, bool alpha, bool isNotRelese)
 {
@@ -277,7 +318,7 @@ void ResourceMng::LoadEffect(SharedEffectHandle& out, const std::filesystem::pat
 		out.SetPtr(effectMap_[key].first);
 		return;
 	}
-	auto h = LoadEffekseerEffect(path.c_str());
+	auto h = LoadEffekseerEffect(path.c_str(), 20.0f);
 	if (h == -1)
 	{
 		DebugErrorLog("エフェクトファイル読み込み失敗");

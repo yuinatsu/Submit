@@ -105,13 +105,8 @@ private:
 	/// <summary>  </summary>
 	/// <param name=""></param>
 	void DrawItemKeyEnd(void);
-
 	
 	void Relese(void);
-	
-
-	//uniqueScene (PauseScene::* updata_)(float, uniqueScene);
-	//void (PauseScene::* draw_)(float);
 
 	// アップデート用メンバ関数ポインタ
 	uniqueScene (PauseScene::* updateFunc_)(float, uniqueScene);
@@ -119,10 +114,8 @@ private:
 	// 描画処理用メンバ関数ポインタ
 	void (PauseScene::* drawFunc_)(float);
 
-
 	uniqueScene beforScene_;
 
-	// ?
 	int scene_;
 
 	float time_;

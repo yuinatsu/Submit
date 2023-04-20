@@ -6,7 +6,7 @@ SilentGame
 【開発環境】
 　　VisualStudio2022
 　　DxLib
-　　Tied
+　　Tiled
 ―――――――――――――――――――――――――――――――――――――
 
 ・実行に必要なプログラムとデータファイル
@@ -25,7 +25,27 @@ SilentGame
 　　X,C　　　　　　　 アイテム欄カーソル移動
 
 ・制作ヵ所
-　　Player関係
-　　アイテム、UI
-　　Input系
-    一部カメラ制御
+　　・全般担当
+	AnimMngクラス
+	ImageMngクラス
+	Controllerクラス
+	InputID.h
+	Keyboardクラス
+	Padクラス
+	Effectクラス
+	EffectID.h
+	ItemUiクラス
+	Staminaクラス
+	UiBaseクラス
+	UiMngクラス
+	PlayerState.h
+	CircleSceneクラス
+	ClearTransクラス
+	DeadTransクラス
+　　・一部担当
+	Animationクラス（Update、コメント記入以外を担当）
+	Playerクラス（ノーマルマップ処理以外を担当）
+	Objクラス（GetPos()やIsAttack()などのプレイヤー、エフェクトに関する処理を担当）
+	ObjManagerクラス（PlayerとEffectに関する処理を担当）
+	BaseSceneクラス（コメント記入以外担当）
+	GameSceneクラス（PlayerとEffect、シーン移行処理等を担当）

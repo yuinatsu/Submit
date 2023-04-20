@@ -41,6 +41,10 @@ public:
 		radius_ = radius;
 	}
 
+	/// <summary>
+	/// ‚‚³‚ÌƒZƒbƒg
+	/// </summary>
+	/// <param name="height"> ‚‚³ </param>
 	void SetHeight(const float height)
 	{
 		height_ = height;

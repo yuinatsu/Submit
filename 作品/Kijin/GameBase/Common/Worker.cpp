@@ -1,6 +1,8 @@
 #include "Worker.h"
 #include "ThreadPool.h"
 
+#include "Debug.h"
+
 Worker::Worker(ThreadPool& threadPool) :
 	threadPool_{threadPool}
 {
@@ -18,6 +20,7 @@ void Worker::SetTask(std::function<void(void)>&& task)
 {
 	std::lock_guard<std::mutex> lock(mutex_);
 	task_ = std::move(task);
+	isTaskEnd_.store(false);
 	cd_.notify_all();
 }
 
@@ -30,12 +33,16 @@ void Worker::Join(void)
 {
 	if (workerThread_.joinable())
 	{
+		// ジョイン可能な時実行フラグをfalseに
 		isRun_.store(false);
 
 		if (isTaskEnd_.load())
 		{
+			// タスクが終了しているとき待機用のタスクを入れる
 			SetTask([]() {});
 		}
+
+		// joinする
 		workerThread_.join();
 	}
 }
@@ -49,6 +56,7 @@ void Worker::Wait(void)
 {
 	while (!isTaskEnd_.load())
 	{
+		// タスクが終了するまでこのスレッドをyieldしながら待つ
 		std::this_thread::yield();
 	}
 
@@ -61,17 +69,17 @@ void Worker::Run(void)
 		{
 			std::unique_lock<std::mutex> lock(mutex_);
 
-			// リストの中身が入るまで待機
+			// リストの中身が入るまで待機(既に入っていたら進む)
 			cd_.wait(lock, [this]() { return task_; });
-
-			isTaskEnd_.store(false);
 
 			// 実行する
 			task_();
-
+			task_ = nullptr;
 			isTaskEnd_.store(true);
 		}
-		threadPool_.GetTask(*this);
+
+		// タスク取得を試みる
+		isTaskEnd_.store(!threadPool_.GetTask(*this));
 		
 	}
 }

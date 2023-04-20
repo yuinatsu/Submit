@@ -77,7 +77,6 @@ void Footprints::SetVertexAndIndex(const Math::Vector2& start, const Math::Vecto
 	vecB.Rota(Math::Deg2Rad(90.0f));
 
 	Math::Vector2 startBack;
-	//startBack.Normalize();
 
 	auto endBack = end - start;
 	endBack.Normalize();

@@ -27,7 +27,16 @@
 
 
 ・制作ヵ所
-　　Player関係
-　　UI
-　　Input系
-    アニメーション関係
+　　・全般担当
+	Keyboardクラス
+	Padクラス
+	Controllerクラス
+	PlayerAnimIndex.h
+	PlayerBehaviorクラス（デザインパターンは委託）
+	PlayerAttackBehaviorクラス（デザインパターンは委託）
+	PlayerSkillBehaviorクラス（デザインパターンは委託）
+　　・一部担当
+	Mathクラス（Clamp()とDirNearAroundRad()を担当）
+	Animatorクラス（デザインパターンは委託、アニメーションブレンドはチームメイトと共同で制作）
+	シェーダー全般（ほかのチームメイトが担当していたが、勉強のために制作に参加した）
+	UI全般（制作後にほかのチームメイトがデザインパターンを変更した）

@@ -37,7 +37,6 @@ OptionScene::OptionScene(uniqueScene gameScene, uniqueScene beforScene, int mapN
 {
 	scene_ = scene;
 	mapNum_ = mapNum;
-	// beforScene_ = std::move(beforScene);
 	beforeScene_ = std::move(gameScene);
 	isBeforGameScene_ = true;
 	wndScreenH_ = MakeScreen(menuWndSize.x, menuWndSize.y, true);
@@ -303,12 +302,6 @@ void OptionScene::DrawInput(void)
 
 void OptionScene::DrawMenu(void)
 {
-	
-	/*SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
-	DrawBox(0, 0, 920, 410, 0x000000, true);
-
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);*/
 	DrawGraph(0, 0, lpImageMng.GetID("OptionFrame")[0], true);
 	menuUICtrl_->Draw();
-
 }

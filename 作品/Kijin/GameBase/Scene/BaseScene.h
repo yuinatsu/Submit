@@ -14,6 +14,13 @@ class Camera;
 class ObjectManager;
 class Controller;
 class UiManager;
+class PEManager;
+
+struct LIGHT_MAT
+{
+	MATRIX view;
+	MATRIX proj;
+};
 
 class BaseScene
 {
@@ -30,6 +37,14 @@ public:
 	BaseScene(ScreenID id, SceneID sceneID);
 
 	/// <summary>
+	/// コンストラクタ(オブジェクトマネージャーを引き継ぐ)
+	/// </summary>
+	/// <param name="objectManager"> オブジェクトマネージャー </param>
+	/// <param name="id"> スクリーンの種類</param>
+	/// <param name="sceneID"> シーンの種類 </param>
+	BaseScene(std::unique_ptr<ObjectManager>&& objectManager,ScreenID id, SceneID sceneID);
+
+	/// <summary>
 	/// デストラクタ 
 	/// </summary>
 	virtual ~BaseScene();
@@ -38,7 +53,7 @@ public:
 	///  更新
 	/// </summary>
 	/// <param name="delta"> デルタタイム </param>
-	virtual void Update(float delta, Controller& controller);
+	virtual void Update(float delta, Controller& controller) = 0;
 
 	/// <summary>
 	/// 描画
@@ -68,6 +83,12 @@ public:
 	virtual bool IsLoaded(void);
 
 	/// <summary>
+	/// ウィンドウ系のシーンから戻った時の処理
+	/// </summary>
+	/// <param name=""></param>
+	virtual void Back(void);
+
+	/// <summary>
 	/// シーンのポインタの更新
 	/// </summary>
 	/// <param name="own"> 現在のシーンのポインタ </param>
@@ -80,11 +101,6 @@ public:
 	/// <param name="id"> 変更後のシーンのID </param>
 	void ChangeSceneID(SceneID id);
 
-	/// <summary>
-	/// バックシーンに変更する
-	/// </summary>
-	/// <param name=""></param>
-	void ChangeBackScene(void);
 
 	/// <summary>
 	/// シーンを生成するためのfunctionをセットする
@@ -104,17 +120,6 @@ public:
 	/// <param name="loadedFunc"></param>
 	void AddLoadedFunc(LoadedFunc&& loadedFunc);
 
-	/// <summary>
-	/// 後ろのシーンをセット
-	/// </summary>
-	/// <param name="back"></param>
-	void SetBackScene(SceneUptr back);
-
-	/// <summary>
-	/// 前のシーンをセット
-	/// </summary>
-	/// <param name="front"></param>
-	void SetFrontScene(SceneUptr front);
 	
 	/// <summary>
 	/// カメラの取得
@@ -131,36 +136,18 @@ public:
 	/// </summary>
 	/// <param name=""></param>
 	/// <returns></returns>
-	ObjectManager& GetObjectManager(void)
+	ObjectManager& GetObjectManager(void) &
 	{
 		return *objMng_;
 	}
 
-	/// <summary>
-	/// バックシーンからの切り替え時に実行される
-	/// </summary>
-	/// <param name=""></param>
-	virtual void ChangeBackFront(void);
-
+	UiManager& GetUiManager(void)&
+	{
+		return *uiMng_;
+	}
 protected:
 
-	/// <summary>
-	/// バックシーンのスクリーンの内容を描画する
-	/// </summary>
-	/// <param name=""></param>
-	void DrawSceneBackScene(void);
-
-	/// <summary>
-	/// バックシーンを描画する
-	/// </summary>
-	/// <param name=""></param>
-	void DrawBackScene(void);
 	
-	// 後ろのシーン(メニューとかポーズ側で使う)
-	SceneUptr back_;
-
-	// 前にあるシーン(メニューとかポーズとかを入れて使う)
-	std::unordered_map<SceneID,SceneUptr> front_;
 
 	// 次移行するシーンID
 	SceneID nextID_;
@@ -180,12 +167,9 @@ protected:
 	// UIマネージャー
 	std::unique_ptr<UiManager> uiMng_;
 
+	// ポストエフェクトマネージャー
+	std::unique_ptr<PEManager> peMng_;
 
-	// backシーンを描画するか
-	bool isDrawBackScene_;
-
-	// backシーンを更新するか
-	bool isUpdateBackScene_;
 private:
 
 	// シーン作成のfunctionをまとめたマップ

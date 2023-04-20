@@ -7,7 +7,7 @@
 
 Animation::Animation(const std::string& fname, const std::string& key, const std::string& state, Obj& owner) : Component{owner}, key_{key}, loop_{0}, playStepTime_{0.0f}
 {
-	Assert(lpAnimMng.Load(fname,key),"アニメーションデータのロード失敗");
+	Assert(lpAnimMng.Load(fname,key),"アニメーションデータのロード失敗");		// ロード失敗時
 	SetState(state);
 }
 
@@ -79,10 +79,12 @@ bool Animation::Draw(DrawMng& drawMng, Math::Vector2 pos, float depth, bool flag
 {
 	if (flag)
 	{
+		// Idle中ならアニメーションストップ
 		drawMng.Draw(pos, 0.0f,depth, lpImageMng.GetID(key_)[lpAnimMng.GetDate(key_, state_).dataList.begin()->first]);
 	}
 	else
 	{
+		// それ以外はアニメーションあり
 		drawMng.Draw(pos, 0.0f, depth,lpImageMng.GetID(key_)[nowItr_->first]);
 	}
 	return true;
@@ -98,10 +100,9 @@ std::string Animation::GetState(void)
 	return state_;
 }
 
-
 void Animation::SetState(const std::string& state)
 {
-	// 状態が同じならはじく
+	// ステータスが同じならはじく
 	if (state_ == state)
 	{
 		return;
@@ -113,6 +114,7 @@ void Animation::SetState(const std::string& state)
 
 void Animation::SetStateSame(const std::string& state)
 {
+	// ステータス格納
 	state_ = state;
 	nowItr_ = lpAnimMng.GetDate(key_, state_).dataList.begin();
 	loop_ = 0;
@@ -120,10 +122,12 @@ void Animation::SetStateSame(const std::string& state)
 
 void Animation::SetKey(const std::string& key)
 {
+	// 同じキーならはじく
 	if (key_ == key)
 	{
 		return;
 	}
+	// 格納
 	key_ = key;
 	nowItr_ = lpAnimMng.GetDate(key_, state_).dataList.begin();
 	loop_ = 0;
@@ -132,7 +136,7 @@ void Animation::SetKey(const std::string& key)
 bool Animation::IsEnd(void) const
 {
 	auto& data = lpAnimMng.GetDate(key_, state_);
-	// ループ最大数が-1以外かつループ回数が最大数と同じとき再生終了してる
+	// ループ最大数が-1以外かつループ回数が最大数と同じとき再生終了
 	return data.loop != -1 && data.loop <= loop_;
 }
 

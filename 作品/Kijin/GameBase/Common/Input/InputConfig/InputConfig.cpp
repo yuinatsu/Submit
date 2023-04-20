@@ -3,6 +3,7 @@
 #include <vector>
 #include "InputConfigMng.h"
 #include "InputConfig.h"
+#include "../../SoundPross.h"
 #include "../../Debug.h"
 
 constexpr char path[] = "Resource/Other/Input/";
@@ -16,6 +17,9 @@ InputConfig::TypeDataTbl InputConfig::typeDataTbl_{
 	{DX_PADTYPE_XBOX_ONE, std::make_pair("padConfigXbox.data", &InputConfig::SetXboxDefalutCode)},
 	{-1, std::make_pair("KeyboardConfig.data", &InputConfig::SetKeyDefalutCode)}
 };
+
+// サウンド設定のデータのパス
+constexpr char soundFile[] = "Resource/Other/Input/Sound.data";
 
 void InputConfig::Create(void)
 {
@@ -58,10 +62,12 @@ void InputConfig::SetDefalutCode(void)
 {
 	if (typeDataTbl_.contains(nowType_))
 	{
+		// 現在のタイプがテーブルに存在する時
 		(this->*typeDataTbl_[nowType_].second)();
 	}
 	else
 	{
+		// しないときデフォルトをセットする
 		SetKeyDefalutCode();
 	}
 }
@@ -71,18 +77,17 @@ void InputConfig::SetPsDefalutCode(void)
 	inputCode_.emplace(InputID::Attack, 1);
 	inputCode_.emplace(InputID::Dash, 0);
 	inputCode_.emplace(InputID::Skil, 3);
-	inputCode_.emplace(InputID::btn1, 9);
 	inputCode_.emplace(InputID::Jump, 0);
-
+	camSpeed_ = 0.5f;
 }
 
 void InputConfig::SetXboxDefalutCode(void)
 {
-	inputCode_.emplace(InputID::Attack, 0);
-	inputCode_.emplace(InputID::btn1, 7);
-	inputCode_.emplace(InputID::Dash, 1);
-	inputCode_.emplace(InputID::Skil, 3);
-	inputCode_.emplace(InputID::Jump, 2);
+	inputCode_.emplace(InputID::Attack, 1);
+	inputCode_.emplace(InputID::Dash, 4);
+	inputCode_.emplace(InputID::Skil, 2);
+	inputCode_.emplace(InputID::Jump, 0);
+	camSpeed_ = 0.5f;
 }
 
 void InputConfig::SetKeyDefalutCode(void)
@@ -91,24 +96,83 @@ void InputConfig::SetKeyDefalutCode(void)
 	inputCode_.emplace(InputID::Skil, KEY_INPUT_E);
 	inputCode_.emplace(InputID::Attack, -MOUSE_INPUT_LEFT);
 	inputCode_.emplace(InputID::Jump, KEY_INPUT_SPACE);
-	inputCode_.emplace(InputID::btn1, KEY_INPUT_ESCAPE);
+	camSpeed_ = 0.25f;
+}
+
+const InputConfig::PeConfig& InputConfig::GetPeConfig(void) const&
+{
+	return peConfig_;
+}
+
+void InputConfig::SetPeConfig(PEID id, bool flag)
+{
+	peConfig_[id] = flag;
 }
 
 InputConfig::InputConfig()
 {
+	// Inputの初期化
+	InitInput();
+
+	// サウンドの初期化
+	InitSound();
+	
+	// ポストプロセスの初期化
+	peConfig_.reserve(2);
+	peConfig_[PEID::Mono] = false;
+	peConfig_[PEID::VolFog] = true;
+
+	
+}
+
+void InputConfig::InitSound()
+{
+	// サウンド設定ファイルを読み込む
+	std::ifstream file{ soundFile, std::ios::binary };
+
+	// とりあえず1.0fで初期化
+	auto se = 1.0f;
+	auto bg = 1.0f;
+	if (file)
+	{
+		// ファイルを読み込めた時
+		std::uint64_t ck;
+		file.read(reinterpret_cast<char*>(&se), sizeof(se));
+		file.read(reinterpret_cast<char*>(&bg), sizeof(bg));
+		file.read(reinterpret_cast<char*>(&ck), sizeof(ck));
+
+		if (std::hash<float>()(se + bg) != ck)
+		{
+			// チェックで値が一致していないときデフォルトにする
+			se = lpSooundPross.GetDefaultSEVolume();
+			bg = lpSooundPross.GetDefaultBGMVolume();
+		}
+	}
+
+	// セットする
+	lpSooundPross.SetSEVolumeUserSet(se);
+	lpSooundPross.SetBGMVolumeUserSet(bg);
+}
+
+void InputConfig::InitInput()
+{
 	nowType_ = GetJoypadType(DX_INPUT_PAD1);
 
+	camSpeed_ = 0.5f;
 	if (typeDataTbl_.contains(nowType_))
 	{
+		// 現在のタイプがテーブルに存在する時設定ファイルをロードする
 		if (!Load(typeDataTbl_[nowType_].first))
 		{
+			// ロード失敗時現在のタイプのデフォルトにする関数を実行する
 			(this->*typeDataTbl_[nowType_].second)();
 		}
 	}
 	else
 	{
+		// ないときキーボードの方でデフォルトにする
 		nowType_ = -1;
-		SetKeyDefalutCode();
+		(this->*typeDataTbl_[nowType_].second)();
 	}
 }
 
@@ -117,6 +181,17 @@ InputConfig::~InputConfig()
 	if (typeDataTbl_.contains(nowType_))
 	{
 		Save(typeDataTbl_[nowType_].first);
+	}
+
+	std::ofstream file{ soundFile, std::ios::binary };
+	if (file)
+	{
+		auto ck = std::hash<float>()(lpSooundPross.GetSEVolumeUserSet() + lpSooundPross.GetBGMVolumeUserSet());
+		auto se = lpSooundPross.GetSEVolumeUserSet();
+		auto bg = lpSooundPross.GetBGMVolumeUserSet();
+		file.write(reinterpret_cast<char*>(&se), sizeof(se));
+		file.write(reinterpret_cast<char*>(&bg), sizeof(bg));
+		file.write(reinterpret_cast<char*>(&ck), sizeof(ck));
 	}
 }
 

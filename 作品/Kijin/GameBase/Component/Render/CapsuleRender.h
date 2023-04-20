@@ -35,9 +35,8 @@ public:
 	}
 
 private:
-	void Draw(void) final;
-	void Draw(int shadowMap, int buff) final;
-	void SetUpShadowMap(void) final;
+	void Draw(int shadowMap = -1, int buff = -1) final;
+	void SetUpDepthTex(int ps = -1, int buff = -1) final;
 	void Load(const std::filesystem::path& path) final;
 	void Update(BaseScene& scene,ObjectManager& objectManager, float delta, Controller& controller) final;
 

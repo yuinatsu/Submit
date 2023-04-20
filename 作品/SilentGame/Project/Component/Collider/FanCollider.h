@@ -1,6 +1,7 @@
 #pragma once
 #include "../../common/Math.h"
 #include "Collider.h"
+#include <memory>
 
 class CircleCollider;
 class TmxObj;

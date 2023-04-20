@@ -7,24 +7,7 @@
 Pad::Pad(int padType) :
 	nowPadType_{padType}, update_{nullptr}
 {
-	if (nowPadType_ == DX_PADTYPE_DUAL_SHOCK_4 || nowPadType_ == DX_PADTYPE_DUAL_SENSE)
-	{
-		update_ = &Pad::UpdatePsPad;
-	}
-	else if (nowPadType_ == DX_PADTYPE_XBOX_360 || nowPadType_ == DX_PADTYPE_XBOX_ONE)
-	{
-		update_ = &Pad::UpdateXboxPad;
-	}
-	else
-	{
-		// とりあえずxbox系と同じの入れとく
-		update_ = &Pad::UpdateXboxPad;
-	}
-
-	std::fill(std::begin(state_.Buttons), std::end(state_.Buttons), 0);
-	padState_ = 0;
 	Init();
-	
 }
 
 Pad::~Pad()
@@ -33,61 +16,106 @@ Pad::~Pad()
 
 bool Pad::Init(void)
 {
+	cursorSpeed_ *= 2.0f;
+	if (nowPadType_ == DX_PADTYPE_DUAL_SHOCK_4 || nowPadType_ == DX_PADTYPE_DUAL_SENSE)
+	{
+		// PS系のコントローラーの時
+		update_ = &Pad::UpdatePsPad;
+	}
+	else if (nowPadType_ == DX_PADTYPE_XBOX_360 || nowPadType_ == DX_PADTYPE_XBOX_ONE)
+	{
+		// xbox系のコントローラーの時
+		update_ = &Pad::UpdateXboxPad;
+	}
+	else
+	{
+		// とりあえずxbox系と同じの入れとく
+		update_ = &Pad::UpdateXboxPad;
+	}
+
+	// 0で初期化しとく
+	std::fill(std::begin(state_.Buttons), std::end(state_.Buttons), 0);
 	return true;
 }
 
 void Pad::Update(float delta)
 {
-	padState_ = GetJoypadInputState(DX_INPUT_PAD1);
+	// パッドの情報を取得
 	GetJoypadDirectInputState(DX_INPUT_PAD1, &state_);
-	//GetJoypadXInputState(DX_INPUT_PAD1, &xinputState_);
-
 	
+	// ボタンの情報をセット
 	for (auto& code : lpConfigMng.GetInputCode())
 	{
 		data_[static_cast<size_t>(code.first)].second = data_[static_cast<size_t>(code.first)].first;
 		data_[static_cast<size_t>(code.first)].first = state_.Buttons[code.second];
 	}
 
-	
-	
-	
-	inputVec_ = Vector2{ static_cast<float>(state_.Y), static_cast<float>(-state_.X) };
-	if (inputVec_.SqMagnitude() <= Square(500.0f))
+	// 左スティックの情報をセット
+	leftInput_ = Vector2{ static_cast<float>(state_.Y), static_cast<float>(-state_.X) };
+	if (leftInput_.SqMagnitude() <= Square(500.0f))
 	{
-		inputVec_ = zeroVector2<float>;
+		// 傾きが一定値以下の時ゼロにする
+		leftInput_ = zeroVector2<float>;
 	}
 	else
 	{
-		inputVec_.Normalize();
+		// コントローラーの傾きを正規化してセットする
+		leftInput_.Normalize();
+		cursorPos_ += Vector2{ static_cast<float>(-leftInput_.y),static_cast<float>(leftInput_.x),} *cursorSpeed_ * delta;
 	}
-	// スティックとかの更新
-	(this->*update_)(delta);}
+
+	// 右スティックと決定&キャンセルボタンの更新
+	(this->*update_)(delta);
+}
+
+const int Pad::GetPadType(void) const
+{
+	return nowPadType_;
+}
 
 void Pad::SetCursorPos(const Vector2& pos)
 {
 	cursorPos_ = pos;
+	rightInput_ = pos;
 }
 
 void Pad::UpdatePsPad(float delta)
 {
+	// 決定ボタンの更新
+	decisionData_.second = decisionData_.first;
+	decisionData_.first = state_.Buttons[1];
+
+	// キャンセルボタンの更新
+	cancelData_.second = cancelData_.first;
+	cancelData_.first = state_.Buttons[9];
+
+	// 右スティックの更新
 	Vector2 move{ static_cast<float>(state_.Z),static_cast<float>(state_.Rz) };
+	rightInput_ = zeroVector2<float>;
 	if (move.SqMagnitude() <= Square(500.0f))
 	{
 		return;
 	}
 	move.Normalize();
-	cursorPos_ += move * cursorSpeed_ * delta;
+	rightInput_ += move * cursorSpeed_ * delta;
 }
 
 void Pad::UpdateXboxPad(float delta)
 {
-	//DebugLog("x=", inputVec_.x, "y=", inputVec_.y);
+	// 決定ボタンの更新
+	decisionData_.second = decisionData_.first;
+	decisionData_.first = state_.Buttons[0];
+	
+	// キャンセルボタンの更新
+	cancelData_.second = cancelData_.first;
+	cancelData_.first = state_.Buttons[7];
+
+	// 右スティックの更新
 	Vector2 move{ static_cast<float>(state_.Rx),static_cast<float>(state_.Ry) };
 	if (move.SqMagnitude() <= Square(500.0f))
 	{
 		return;
 	}
 	move.Normalize();
-	cursorPos_ += move * cursorSpeed_ * delta;
+	rightInput_ += move * cursorSpeed_ * delta;
 }

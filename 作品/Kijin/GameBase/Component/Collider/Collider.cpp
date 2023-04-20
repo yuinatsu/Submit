@@ -27,6 +27,7 @@ void Collider::Hit(Collider& col, ObjectManager& objMng)
 {
 	if (hit_)
 	{
+		// ヒット時に呼び出すべきfunctionがある時呼び出す
 		hit_(col, objMng);
 	}
 }
@@ -71,9 +72,11 @@ bool Collider::HitCheck(CapsuleCollider& a, MeshCollider& b)
 
 bool Collider::HitCheck(CapsuleCollider& a, CharactorCollider& b)
 {
+	// カプセルのトップとボトムの座標を取得
 	auto aTop{ a.GetTop() };
 	auto aBotm{ a.GetBottom() };
 
+	// キャラクターのトップとボトムの座標を取得
 	auto bTop{ b.GetTop() };
 	auto bBotm{ b.GetBottom() };
 
@@ -113,10 +116,11 @@ bool Collider::HitCheck(SphereCollider& a, MeshCollider& b)
 
 bool Collider::HitCheck(SphereCollider& a, CharactorCollider& b)
 {
+	// 球体の情報を取得
 	auto r{ a.GetRadius() };
 	auto pos{ a.GetPos() };
 
-
+	// カプセルのトップとボトムの座標を取得
 	auto bTop{ b.GetTop() };
 	auto bBotm{ b.GetBottom() };
 
@@ -125,12 +129,35 @@ bool Collider::HitCheck(SphereCollider& a, CharactorCollider& b)
 		VGet(bTop.x, bTop.y, bTop.z), VGet(bBotm.x, bBotm.y, bBotm.z), b.GetRadius()) == TRUE;
 }
 
-bool Collider::HitCheck(SphereCollider& a, TerrainCollider& b)
+bool Collider::HitCheck(SphereCollider& a, TerrainCollider& b, ObjectManager& objectmanager)
 {
+	// 球体の情報を取得
 	auto r{ a.GetRadius() };
 	auto pos{ a.GetPos() };
+
 	auto result = MV1CollCheck_Sphere(b.GetHandle(), -1, VGet(pos.x, pos.y, pos.z), r);
 	auto ret{ result.HitNum > 0 };
+
+	if (ret && a.IsBlock())
+	{
+		// 当たっていてかつ押し出し処理をするとき
+		auto trans = objectmanager.GetComponent<Transform>(a.GetOwnerID());
+		for (int i = 0; i < result.HitNum; i++)
+		{
+			for (int tcount = 0; tcount < 10; tcount++)
+			{
+				if (!HitCheck_Sphere_Triangle(VGet(pos.x, pos.y, pos.z), r, result.Dim[i].Position[0], result.Dim[i].Position[1], result.Dim[i].Position[2]))
+				{
+					break;
+				}
+				trans->Pos() += Vector3{ result.Dim[i].Normal.x,result.Dim[i].Normal.y, result.Dim[i].Normal.z}.Normalized() * 1.0f;
+				pos = a.GetPos();
+				r = a.GetRadius();
+				
+			}
+		}
+	}
+
 	DxLib::MV1CollResultPolyDimTerminate(result);
 	return ret;
 }
@@ -160,12 +187,13 @@ bool Collider::HitCheck(MeshCollider& a, TerrainCollider& b)
 
 bool Collider::HitCheck(CharactorCollider& a, CharactorCollider& b, ObjectManager& objectManager)
 {
+	// それぞれのトップとボトムの座標を取得
 	auto atop{ a.GetTop() };
 	auto abotm{ a.GetBottom() };
-
 	auto bBtm{ b.GetBottom() };
 	auto bTop{ b.GetTop() };
 
+	// 最短距離を求める
 	auto dis = Segment_Segment_MinLength(
 		VGet(atop.x, atop.y, atop.z), VGet(abotm.x, abotm.y, abotm.z),
 		VGet(bBtm.x, bBtm.y, bBtm.z), VGet(bTop.x, bTop.y, bTop.z));
@@ -193,23 +221,29 @@ bool Collider::HitCheck(CharactorCollider& a, CharactorCollider& b, ObjectManage
 
 bool Collider::HitCheck(CharactorCollider& a, TerrainCollider& b, ObjectManager& objectManager)
 {
+	// カプセルのトップとボトムの座標を取得
 	auto aTop{ a.GetTop() };
 	auto aBtm{ a.GetBottom() };
+
+	// トランスフォームを取得
 	auto trans = objectManager.GetComponent<Transform>(a.GetOwnerID());
 
 	// 接地判定
 	// 判定用の終点を求める
 	auto aEnd{ aBtm + (downVector3<float> *(a.GetRadius())) };
 	auto aStart{ aEnd + (upVector3<float> * a.GetGravityPow()) };
+
+	// 少し長めに判定を取るようにする
 	constexpr auto overSize{ 10.0f };
 	aEnd += downVector3<float> * overSize;
 	aStart += upVector3<float> *overSize;
+
 	// チェック
 	auto lineResult = MV1CollCheck_Line(b.GetHandle(), -1, VGet(aStart.x, aStart.y, aStart.z), VGet(aEnd.x, aEnd.y, aEnd.z));
 	if (lineResult.HitFlag > 0)
 	{
 		// 当たった座標
-		//auto hitPos = Vector3{ lineResult.HitPosition.x, lineResult.HitPosition.y , lineResult.HitPosition.z };
+		auto hitPos = Vector3{ lineResult.HitPosition.x, lineResult.HitPosition.y , lineResult.HitPosition.z };
 
 		// 当たったポリゴンの法制
 		auto hitNormal = Vector3{ lineResult.Normal.x , lineResult.Normal.y, lineResult.Normal.z };
@@ -226,6 +260,10 @@ bool Collider::HitCheck(CharactorCollider& a, TerrainCollider& b, ObjectManager&
 		trans->Pos() += v ;
 		a.SetGroundFlag(true);
 		a.SetGravityPow(0.0f);
+
+		// 補正を掛けたので座標を再取得
+		aTop = a.GetTop();
+		aBtm = a.GetBottom();
 	}
 	else
 	{
@@ -233,13 +271,14 @@ bool Collider::HitCheck(CharactorCollider& a, TerrainCollider& b, ObjectManager&
 	}
 	
 
-	aTop = a.GetTop();
-	aBtm = a.GetBottom();
+	
 
 
 	// ダッシュを考慮した判定を取る
 	auto topDashStart = aTop + (-a.GetMoveDir() * a.GetSpeed());
 	auto btmDashStart = aBtm + (-a.GetMoveDir() * a.GetSpeed());
+	
+	// 上下二点から当たり判定を取る
 	auto topResult = MV1CollCheck_Line(b.GetHandle(), -1, VGet(topDashStart.x, topDashStart.y, topDashStart.z),VGet(aTop.x, aTop.y, aTop.z));
 	auto btmResult = MV1CollCheck_Line(b.GetHandle(), -1, VGet(btmDashStart.x, btmDashStart.y, btmDashStart.z), VGet(aBtm.x, aBtm.y, aBtm.z));
 	bool ret = false;
@@ -251,6 +290,8 @@ bool Collider::HitCheck(CharactorCollider& a, TerrainCollider& b, ObjectManager&
 			// 上下両方当たってる時
 			auto topHitPos{ Vector3{topResult.HitPosition.x,topResult.HitPosition.y, topResult.HitPosition.z} };
 			auto btmHitPos{ Vector3{btmResult.HitPosition.x,btmResult.HitPosition.y, btmResult.HitPosition.z} };
+			DebugDrawSphere(topHitPos, 50.0f, 0xff0000);
+			DebugDrawSphere(btmHitPos, 50.0f, 0xff0000);
 			if ((topHitPos - topDashStart).SqMagnitude() < (btmHitPos - btmDashStart).SqMagnitude())
 			{
 				// 上の方が元の位置からの交点が近いとき
@@ -277,6 +318,8 @@ bool Collider::HitCheck(CharactorCollider& a, TerrainCollider& b, ObjectManager&
 				trans->Pos() += -a.GetMoveDir() * ((a.GetSpeed() - (btmHitPos - btmDashStart).Magnitude()) + a.GetRadius());
 			}
 		}
+
+		// 座標に補正を掛けたので再取得
 		aTop = a.GetTop();
 		aBtm = a.GetBottom();
 	}
@@ -289,16 +332,19 @@ bool Collider::HitCheck(CharactorCollider& a, TerrainCollider& b, ObjectManager&
 		ret = true;
 		for (int i = 0; i < result.HitNum; i++)
 		{
-			for (int tcount = 0; tcount < 10; tcount++)
+			// 押し出しする
+			for (int tcount = 0; tcount < 50; tcount++)
 			{
 				if (!HitCheck_Capsule_Triangle(
 					VGet(aTop.x, aTop.y, aTop.z), VGet(aBtm.x, aBtm.y, aBtm.z), a.GetRadius(),
 					result.Dim[i].Position[0], result.Dim[i].Position[1], result.Dim[i].Position[2]
 				))
 				{
+					// ポリゴンと当たってないときのループを抜ける
 					break;
 				}
 
+				// ポリゴンの法線方向に押し出す
 				trans->Pos() += Vector3{ result.Dim[i].Normal.x, result.Dim[i].Normal.y, result.Dim[i].Normal.z }.Normalized() * 1.0f;
 				aTop = a.GetTop();
 				aBtm = a.GetBottom();
@@ -306,9 +352,8 @@ bool Collider::HitCheck(CharactorCollider& a, TerrainCollider& b, ObjectManager&
 		}
 	}
 
+	// 当たり判定情報を破棄する
 	MV1CollResultPolyDimTerminate(result);
-
-	
 
 	return ret;
 }

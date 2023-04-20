@@ -43,16 +43,29 @@ public:
 		return id_;
 	}
 
+	/// <summary>
+	/// ファクトリーを使い削除処理を行うかのフラグをセットする
+	/// </summary>
+	/// <param name="flag"> フラグ </param>
 	void SetUseFactory(const bool flag)
 	{
 		useFactory_ = flag;
 	}
 
+	/// <summary>
+	/// オブジェクトの属性をセットする
+	/// </summary>
+	/// <param name="atr"> セットするオブジェクトの属性 </param>
 	void SetAttribute(const ObjectAttribute atr)
 	{
 		attribute_ = atr;
 	}
 
+	/// <summary>
+	/// オブジェクトの属性を取得する
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns> オブジェクトの属性 </returns>
 	const ObjectAttribute GetAttribute(void) const
 	{
 		return attribute_;
@@ -66,7 +79,6 @@ private:
 
 	// factoryを使った削除を行うか
 	bool useFactory_ = false;
-
 
 	// オブジェクトの属性(敵かプレイヤーのかそれ以外か)
 	ObjectAttribute attribute_;

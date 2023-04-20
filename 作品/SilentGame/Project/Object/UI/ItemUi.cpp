@@ -87,8 +87,8 @@ void ItemUi::UpdateGame(const double& delta, const std::shared_ptr<ObjManager> o
 		}
 	}
 	// 攻撃時のアイテムUI処理
-	auto tmp = controller_->LongPress(InputID::Attack, 3.0, delta);
-	if (tmp == "Attack" && order_.size())
+	auto tmp = controller_->Press(InputID::Attack);
+	if (tmp && order_.size())
 	{
 		// 使用したアイテムの情報格納
 		useItem_ = static_cast<ItemName>(order_.at(0).first);

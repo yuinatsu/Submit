@@ -1,5 +1,6 @@
 #pragma once
 #include "ComponentConcept.h"
+#include <cassert>
 #include "../Object/ObjectID.h"
 
 class ObjectManager;
@@ -31,6 +32,7 @@ public:
 	{
 		if (!objManager_->HaveComponent<T>(id_))
 		{
+			assert(false);
 			return nullptr;
 		}
 		return ptr_;

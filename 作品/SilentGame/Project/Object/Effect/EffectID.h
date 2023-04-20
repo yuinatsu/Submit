@@ -1,6 +1,6 @@
 #pragma once
 
-/// <summary> エフェクトの種類 </summary>
+// エフェクトの種類 
 enum class EffectName
 {
 	Slash,			// 斬撃
@@ -17,7 +17,7 @@ enum class EffectName
 	Max
 };
 
-/// <summary> エフェクトの種類（画像サイズx120） </summary>
+// エフェクトの種類（画像サイズx120） 
 enum class EffectName_x120
 {
 	Tornado,		// 竜巻
@@ -25,7 +25,7 @@ enum class EffectName_x120
 	Max
 };
 
-/// <summary> エフェクトの種類（カメラサイズ全体） </summary>
+// エフェクトの種類（カメラサイズ全体） 
 enum class EffectNameWhole
 {
 	Super,			// 必殺技

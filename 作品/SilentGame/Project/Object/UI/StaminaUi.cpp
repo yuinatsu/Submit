@@ -9,14 +9,16 @@ StaminaUi::StaminaUi(const Math::Vector2& pos, const Math::Vector2& gageDiv) : U
 	pos_ = pos;
 	gageMaxCnt_ = (int)gageDiv.x;
 	stamina_ = (float)gageMaxCnt_ * 10.0f;
-	isDash_ = false;
-	isMove_ = false;
-	canDash_ = true;
+	isDash_ = false;							// 初期値は歩き
+	isMove_ = false;							// 初期値はIdle
+	canDash_ = true;							// 初期値は走れる状態
+	// ゲーム開始時演出
 	updateFunc_ = std::bind(&StaminaUi::UpdateStart, this, std::placeholders::_1, std::placeholders::_2);
 	drawFunc_ = std::bind(&StaminaUi::DrawStart, this, std::placeholders::_1);
+
 	count_ = 0.0f;
-	startFinSta_ = false;
-	size_ = Math::Vector2(447, 30);
+	startFinSta_ = false;						// 演出未終了
+	size_ = Math::Vector2(447, 30);				// ゲージサイズ
 	ext_ = 0.0f;
 	memCnt_ = 0.0f;
 
@@ -105,6 +107,7 @@ void StaminaUi::UpdateStamina(const double& delta)
 
 void StaminaUi::SetStaminaValue(const double& value)
 {
+	// スタミナ値加減
 	stamina_ = stamina_ + static_cast<float>(value);
 }
 
@@ -115,13 +118,17 @@ void StaminaUi::DrawUI(const double& delta)
 
 void StaminaUi::DrawStart(const double& delta)
 {
+	// ゲーム開始時演出用描画
+	// 外枠
 	DrawRotaGraph3F(pos_.x + (size_.x / 2.0f), pos_.y + (size_.y / 2.0f), size_.x / 2.0f, size_.y / 2.0f, 1.0f, ext_, 0.0f, lpImageMng.GetID("Box")[0], true);
 	if (count_ > 1.0f)
 	{
+		// メモリカウンタ上限
 		if (memCnt_ >= gageMaxCnt_)
 		{
 			memCnt_ = (float)gageMaxCnt_;
 		}
+		// カウント分メモリを描画
 		for (int i = 0; i < (int)(memCnt_); i++)
 		{
 			DrawGraphF(pos_.x + 6.0f + 6.0f * i, pos_.y + 5.75f, lpImageMng.GetID("Gage")[i], true);
@@ -131,9 +138,12 @@ void StaminaUi::DrawStart(const double& delta)
 
 void StaminaUi::DrawGame(const double& delta)
 {
+	// ゲーム中描画
+	// 外枠
 	DrawRotaGraph2F(pos_.x + (size_.x / 2.0f), pos_.y + (size_.y / 2.0f), size_.x / 2.0f, size_.y / 2.0f, ext_, 0.0f, lpImageMng.GetID("Box")[0], true);
 	for (int i = 0; i <= (stamina_ / 10) - 1; i++)
 	{
+		// メモリ描画
 		DrawGraphF(pos_.x + 6.0f + 6.0f * i, pos_.y + 5.75f, lpImageMng.GetID("Gage")[i], true);
 	}
 }

@@ -9,75 +9,71 @@ class ClearTrans :
     public TransitionScene
 {
 public:
-    /// <summary> コンストラクタ </summary>
-    /// <param name="objMng"> ObjクラスのManager </param>
-    /// <param name="offset"> オフセット </param>
-    /// <param name="drawMng"> 描画Manager </param>
-    /// <param name="beforScene"> 前シーン </param>
-    /// <param name="afterScene"> 後シーン </param>
+    // コンストラクタ 
     ClearTrans(std::shared_ptr<ObjManager> objMng, DrawMng& drawMng, Camera& camera, std::shared_ptr<TmxObj> tmxObj, std::shared_ptr<GmkEvent> gEvent, uniqueScene beforScene, uniqueScene afterScene);
     ~ClearTrans();
 private:
-    /// <summary> トランジション更新 </summary>
-    /// <param name="delta"> デルタタイム </param>
-    /// <returns> トランジション完了:true </returns>
+    // トランジション更新 
     bool UpdataTransition(double delta);
 
-    /// <summary> 画面ズームの更新 </summary>
+    // 画面ズームの更新 
     void UpdateZoom(double delta);
 
-    /// <summary> 斬撃アニメーションの更新 </summary>
+    // 斬撃アニメーションの更新 
     void UpdateSlash(double delta);
 
-    /// <summary> 爆破アニメーションの更新 </summary>
+    // 爆破アニメーションの更新 
     void UpdateExplosion(double delta);
 
-    /// <summary> トランジション描画 </summary>
-    /// <param name="delta"> デルタタイム </param>
+    // トランジション描画 
     void DrawOwnScreen(float delta) override;
 
-    /// <summary> 画面ズームの描画 </summary>
+    // 画面ズームの描画 
     void DrawZoom(double delta);
 
-    /// <summary> 斬撃アニメーションの描画 </summary>
+    // 斬撃アニメーションの描画 
     void DrawSlash(double delta);
 
-    /// <summary> 爆破アニメーションの描画 </summary>
+    // 爆破アニメーションの描画 
     void DrawExplosion(double delta);
 
-    /// <summary> 更新用のファンクション </summary>
+    // 更新用のファンクション 
     std::function<void(double)> updateFunc_;
 
-    /// <summary> 描画用のファンクション </summary>
+    // 描画用のファンクション 
     std::function<void(double)> drawFunc_;
 
-    /// <summary> トランジション完了フラグ </summary>
+    // トランジション完了フラグ 
     bool isEnd_;
 
-    /// <summary> デルタタイム </summary>
-    //double delta_;
-
-    /// <summary> 最大時間 </summary>
+    // 最大時間 
     double limitTime_;
 
-    /// <summary> 描画Manager </summary>
+    // 描画Manager 
     DrawMng& drawmng_;
 
     // 画面ズーム倍率
     double zoomExt_;
 
+    // ズーム座標
     Math::Vector2 zoomPos_;
 
+    // カメラ情報
     Camera& camera_;
 
+    // ゲームシーンの最後のスクリーン情報
     int viewID_;
 
+    // ステージ情報
     std::shared_ptr<TmxObj> tmxObj_;
 
+    // ギミックイベント
     std::shared_ptr<GmkEvent> gEvent_;
 
+    // エフェクトフラグ
     bool effectF_;
 
+    // ズーム距離
     Math::Vector2 distance_;
 };
 

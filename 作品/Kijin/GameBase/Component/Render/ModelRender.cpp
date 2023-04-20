@@ -3,15 +3,16 @@
 #include "../../Scene/BaseScene.h"
 #include "../../Object/ObjectManager.h"
 #include "../../Common/ResourceMng.h"
-#include "../../Application.h"
+#include "../../SceneManager.h"
 #include <unordered_map>
 
 #include "../../Common/Debug.h"
 
 // 頂点タイプに合わせたシェーダパスのテーブル
-const std::unordered_map<int, std::filesystem::path> vsShaderPathTbl{
-	{DX_MV1_VERTEX_TYPE_1FRAME, "Resource/resource/Shader/Vertex/Mesh.vso"},
-	{DX_MV1_VERTEX_TYPE_4FRAME,"Resource/resource/Shader/Vertex/Mesh4.vso"}
+const std::unordered_map<int, std::string> vsShaderNameTbl{
+	{DX_MV1_VERTEX_TYPE_1FRAME, "Mesh.vso"},
+	{DX_MV1_VERTEX_TYPE_4FRAME,"Mesh4.vso"},
+	{DX_MV1_VERTEX_TYPE_NMAP_1FRAME,"NormMesh.vso"}
 };
 
 
@@ -23,20 +24,13 @@ ModelRender::~ModelRender()
 {
 }
 
-void ModelRender::Draw(void)
-{
-	SetTextureAddressMode(DX_TEXADDRESS_CLAMP);
-	
-	// シェーダをセットして描画
-	MV1SetUseOrigShader(true);
-	SetUseVertexShader(*vs_);
-	SetUsePixelShader(*ps_);
-	MV1DrawModel(*handle_);
-	MV1SetUseOrigShader(false); 
-}
-
 void ModelRender::Draw(int shadowMap, int buff)
 {
+	if (!IsCameraView())
+	{
+		return;
+	}
+
 	SetTextureAddressMode(DX_TEXADDRESS_CLAMP);
 
 	// シェーダをセットして描画
@@ -46,29 +40,30 @@ void ModelRender::Draw(int shadowMap, int buff)
 	UpdateShaderConstantBuffer(buff);
 	SetShaderConstantBuffer(buff, DX_SHADERTYPE_VERTEX, 4);
 	// シャドウマップをテクスチャとしてセット
-	SetUseTextureToShader(1, shadowMap);
+	SetUseTextureToShader(3, shadowMap);
 	// ここでセットしたシャドウマップのフィルタリングとアドレスUVの設定を行う
 	//MV1SetTextureSampleFilterMode(*handle_, 1, DX_DRAWMODE_ANISOTROPIC);
 	//MV1SetTextureAddressMode(*handle_, 1, DX_TEXADDRESS_MIRROR, DX_TEXADDRESS_MIRROR);
 	
 	MV1DrawModel(*handle_);
 	MV1SetUseOrigShader(false);
-
-	// テストでカメラ範囲チェック用boxを表示する
-	//DebugDrawCube(boxPos1_, boxPos2_, 0xffffff);
+	SetUseTextureToShader(3, -1);
 }
 
-void ModelRender::SetUpShadowMap(void)
+void ModelRender::SetUpDepthTex(int ps, int buff)
 {
-	if (ps == 0 && vs == 0)
+	if (!IsCameraView())
 	{
-		LoadVertex();
+		return;
 	}
 	MV1SetUseOrigShader(true);
 	SetUsePixelShader(ps);
-	SetUseVertexShader(vs);
+	SetUseVertexShader(*shadowVs_);
+	UpdateShaderConstantBuffer(buff);
+	SetShaderConstantBuffer(buff, DX_SHADERTYPE_PIXEL, 6);
 	MV1DrawModel(*handle_);
 	MV1SetUseOrigShader(false);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 6);
 }
 
 std::string ModelRender::Load(std::ifstream& file)
@@ -83,53 +78,9 @@ std::string ModelRender::Load(std::ifstream& file)
 
 void ModelRender::Load(const std::filesystem::path& path)
 {
-	lpResourceMng.LoadModel(handle_, path);
+	lpSceneMng.GetResourceMng().LoadModel(handle_, path);
 }
 
-void ModelRender::LoadVertex(void)
-{
-	auto tlNum = MV1GetTriangleListNum(*handle_);
-	tlbertType_ = -1;
-	for (int i = 0; i < tlNum; ++i)
-	{
-		tlbertType_ = MV1GetTriangleListVertexType(*handle_, i);
-		break;
-	}
-	switch (tlbertType_)
-	{
-	case DX_MV1_VERTEX_TYPE_1FRAME:
-		vs = LoadVertexShader(L"Resource/resource/Shader/ShadowMap/Mesh.vso");
-		break;
-	case DX_MV1_VERTEX_TYPE_4FRAME:
-		vs = LoadVertexShader(L"Resource/resource/Shader/ShadowMap/Mesh4.vso");
-		break;
-	case DX_MV1_VERTEX_TYPE_8FRAME:
-		break;
-	case DX_MV1_VERTEX_TYPE_NMAP_1FRAME:
-		break;
-	case DX_MV1_VERTEX_TYPE_NMAP_4FRAME:
-		break;
-	case DX_MV1_VERTEX_TYPE_NMAP_8FRAME:
-		break;
-	default:
-		break;
-	}
-	//if (tlbertType_ == DX_MV1_VERTEX_TYPE_1FRAME) {
-	//  vs = LoadVertexShader(L"Resource/resource/Shader/ShadowMap/Mesh.vso");
-	//}
-	//else if (tlbertType_ == DX_MV1_VERTEX_TYPE_4FRAME) {
-	//	vs = LoadVertexShader(L"Resource/resource/Shader/ShadowMap/Mesh4.vso");
-	//}
-	//else if (tlbertType_ == DX_MV1_VERTEX_TYPE_8FRAME) {
-	//}
-	//else if (tlbertType_ == DX_MV1_VERTEX_TYPE_NMAP_1FRAME) {
-	//}
-	//else if (tlbertType_ == DX_MV1_VERTEX_TYPE_NMAP_4FRAME) {
-	//}
-	//else if (tlbertType_ == DX_MV1_VERTEX_TYPE_NMAP_8FRAME) {
-	//}
-	ps = LoadPixelShader(L"Resource/resource/Shader/ShadowMap/ShadowMap.pso");
-}
 
 void ModelRender::Update(BaseScene& scene,ObjectManager& objectManager, float delt, Controller& controller)
 {
@@ -139,13 +90,18 @@ void ModelRender::Update(BaseScene& scene,ObjectManager& objectManager, float de
 		const auto& scale = transform_.Get()->GetScale();
 		MV1SetPosition(*handle_, VGet(pos.x, pos.y, pos.z));
 		MV1SetScale(*handle_, VGet(scale.x, scale.y, scale.z));
-		MV1SetRotationMatrix(*handle_, transform_->GetRotationMatrix());
-		// 下のはテスト後で消す
-		int meshNum = MV1GetMeshNum(*handle_);
-		for (int i = 0; i < meshNum; i++)
+		auto rot = transform_->GetRotation().ToEuler();
+		rot += defaultRot_;
+		MV1SetRotationXYZ(*handle_, { rot.x, rot.y, rot.z });
+
+		
+#ifdef _DEBUG
+		if (bb_.isCheck_)
 		{
-			MV1SetMeshBackCulling(*handle_, i, DX_CULLING_NONE);
+			auto q = transform_->GetRotation();
+			DebugDrawCube(pos + (q * bb_.ltSize_), pos + (q * bb_.rbSize_), 0xffffff);
 		}
+#endif
 	}
 }
 
@@ -155,9 +111,10 @@ void ModelRender::Begin(ObjectManager& objectManager)
 
 	Render::Begin(objectManager);
 	auto type = MV1GetTriangleListVertexType(*handle_, 0);
-	if (vsShaderPathTbl.contains(type))
+	if (vsShaderNameTbl.contains(type))
 	{
-		lpResourceMng.LoadVS(vs_, vsShaderPathTbl.at(type));
+		lpSceneMng.GetResourceMng().LoadVS(vs_, "Resource/resource/Shader/Vertex/" + vsShaderNameTbl.at(type));
+		lpSceneMng.GetResourceMng().LoadVS(shadowVs_, "Resource/resource/Shader/ShadowMap/" + vsShaderNameTbl.at(type));
 	}
 	else
 	{
@@ -166,9 +123,47 @@ void ModelRender::Begin(ObjectManager& objectManager)
 
 	if (type < 3)
 	{
-		lpResourceMng.LoadPS(ps_, "Resource/resource/Shader/Pixel/Tex.pso");
+		lpSceneMng.GetResourceMng().LoadPS(ps_, "Resource/resource/Shader/Pixel/Tex.pso");
+	}
+	else
+	{
+		lpSceneMng.GetResourceMng().LoadPS(ps_, "Resource/resource/Shader/Pixel/NormTex.pso");
+	}
+	lpSceneMng.GetResourceMng().LoadPS(shadowPs_, "Resource/resource/Shader/ShadowMap/ShadowMap.pso");
+
+	int meshNum = MV1GetMeshNum(*handle_);
+	for (int i = 0; i < meshNum; i++)
+	{
+		MV1SetMeshBackCulling(*handle_, i, DX_CULLING_NONE);
+	}
+}
+
+void ModelRender::End(ObjectManager& objectManager)
+{
+	bb_.isCheck_ = false;
+	bb_.ltSize_ = zeroVector3<float>;
+	bb_.rbSize_ = zeroVector3<float>;
+}
+
+bool ModelRender::IsCameraView(void)
+{
+	if (bb_.isCheck_)
+	{
+		return bb_.IsHit(transform_->GetPos(), transform_->GetRotation());
 	}
 
-	ps = 0;
-	vs = 0;
+	return true;
+}
+
+
+ModelRender::CameraBB::CameraBB():
+	isCheck_{false}
+{
+}
+
+bool ModelRender::CameraBB::IsHit(const Vector3& pos, const Quaternion& rot) const&
+{
+	auto lt = pos + (rot * ltSize_);
+	auto rb = pos + (rot * rbSize_);
+	return !CheckCameraViewClip_Box(VGet(lt.x, lt.y, lt.z), VGet(rb.x, rb.y, rb.z));
 }

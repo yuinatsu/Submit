@@ -5,20 +5,25 @@
 #include "../Component/Info/ObjectInfo.h"
 #include "../Component/Collider/CapsuleCollider.h"
 
+#include "../Common/Debug.h"
+
 PlayerAttackFactory::PlayerAttackFactory(ObjectManager& objectManager) :
-	Factory{objectManager}
+	Factory{ objectManager }
 {
 }
 
 ObjectID PlayerAttackFactory::Create(ObjectID ownerID, const Vector3& pos, const Vector3& rot)
 {
+
 	auto id = objectManager_.MakeObjectID();
+	
+	DebugLog("プレイヤー攻撃生成ID=", *id);
 
 	// 動き
 	auto behavior = objectManager_.GetPool().Pop<PlayerAttackBehavior>();
-	behavior->SetAttackTime(3.0f);
+	behavior->SetAttackTime(2.0f);
 	objectManager_.AddComponent(std::move(behavior), id);
-	
+
 	// オブジェクトの情報
 	auto info = objectManager_.GetPool().Pop<ObjectInfo>();
 	info->SetUseFactory(true);
@@ -28,14 +33,8 @@ ObjectID PlayerAttackFactory::Create(ObjectID ownerID, const Vector3& pos, const
 	// トランスフォーム
 	auto transform = objectManager_.GetPool().Pop<Transform>();
 	transform->Pos() = zeroVector3<float>;
-	transform->SetParent(ownerID);
-	transform->AddLocalRotFromEulerRot({ Deg2Rad(90.0f), 0.0f, 0.0f });
-	auto parent = objectManager_.GetComponent<Transform>(ownerID);
-	if (parent.IsActive())
-	{
-		parent->AddChild(id);
-	}
-
+	// transform->SetParent(ownerID);
+	transform->AddRotation({ Deg2Rad(90.0f), 0.0f, 0.0f });
 	objectManager_.AddComponent(std::move(transform), id);
 
 	// 当たり判定
@@ -43,8 +42,10 @@ ObjectID PlayerAttackFactory::Create(ObjectID ownerID, const Vector3& pos, const
 	col->SetOffset({ 0.0,-60.0f,0.0f });
 	col->SetRadius(30.0f);
 	col->SetHeight(35.0f);
-	
+
 	objectManager_.AddComponent(std::move(col), id);
+
+	objectManager_.SetPlayerAttackID(id);
 
 	return id;
 }

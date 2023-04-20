@@ -39,11 +39,22 @@ public:
 		return isHitCursor_;
 	}
 
-
+	/// <summary>
+	/// ボタンかどうか
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
 	bool IsButton(void) const final
 	{
 		return true;
 	}
+
+	/// <summary>
+	/// 決定を押されているか(スライダー等で長押しを使うときオーバーライドする)
+	/// </summary>
+	/// <param name="controller"></param>
+	/// <returns></returns>
+	virtual bool IsDecision(Controller& controller) const;
 
 	// カーソルと当たっている時
 	bool isHitCursor_;

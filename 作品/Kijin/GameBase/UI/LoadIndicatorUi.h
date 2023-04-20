@@ -4,21 +4,20 @@ class LoadIndicatorUi :
     public UiBase
 {
 public:
-    LoadIndicatorUi(const std::filesystem::path& path, const Vector2& pos);
-    ~LoadIndicatorUi();
+    LoadIndicatorUi(const std::filesystem::path& indPath, const Vector2& indPos, const std::filesystem::path& fontPath);
 private:
-    void Update(float delta, ObjectManager& objMng, Controller& controller) override;
-    void Draw() override;
+    static constexpr int Interval = 3;
+
+    void Update(float delta, BaseScene& scene, ObjectManager& objMng, Controller& controller) override;
+    void Draw(int mainScr) override;
     UiID GetUIID(void) override { return UiID::Indicator; }
 
-    // èôÅXÇ…âÒì]Ç∑ÇÈó 
-    static constexpr float SpeedRot = 3.0f;
-    static constexpr float SpeedRotRad = SpeedRot * (DX_PI_F / 180.0f);
     // ï`âÊäpìx
     double angle_;
-    
-    float time_;
-    int cnt_;
+
     SharedGraphicHandle handle_;
+    SharedGraphicHandle loadHandle_;
+
+    int cnt_;
 };
 

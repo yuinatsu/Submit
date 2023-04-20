@@ -10,5 +10,7 @@ enum class UiID {
 	Icon,				// アイコン各種
 	Cursor,				// カーソル
 	Combo,				// コンボ数	Max,
-	Button				// ボタン
+	Button,				// ボタン
+	TutorialMess,		// チュートリアルのメッセージ
+	MinMap,
 };

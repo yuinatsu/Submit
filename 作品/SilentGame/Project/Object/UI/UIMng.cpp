@@ -6,8 +6,10 @@
 
 UIMng::UIMng()
 {
+	// UI生成
 	itemUI_ = std::make_shared<ItemUi>(Math::Vector2{ 20,550 }, Math::Vector2{ 269,128 });
 	staminaUI_ = std::make_shared<StaminaUi>(Math::Vector2{ 300,615 }, Math::Vector2{ 73,1 });
+	// 各フラグ
 	stanimaF_ = true;
 	effectF_ = false;
 }
@@ -30,12 +32,14 @@ bool UIMng::Update(float delta, const std::shared_ptr<ObjManager> objMng)
 
 void UIMng::Draw(const double& delta)
 {
+	// 各描画
 	itemUI_->DrawUI(delta);
 	staminaUI_->DrawUI(delta);
 }
 
 bool UIMng::FinStart()
 {
+	// ゲーム開始時演出終了
 	return (itemUI_->IsStartFin() && staminaUI_->IsStartFin());
 }
 

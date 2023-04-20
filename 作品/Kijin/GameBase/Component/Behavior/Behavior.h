@@ -24,7 +24,5 @@ public:
 	/// </summary>
 	/// <param name="objManager"> オブジェクトマネージャー </param>
 	virtual void Destory(ObjectManager& objManager){}
-private:
-
 };
 

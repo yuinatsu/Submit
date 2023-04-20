@@ -2,6 +2,8 @@
 #include "Worker.h"
 #include <deque>
 
+#include "Debug.h"
+
 ThreadPool::ThreadPool(unsigned int threadNum)
 {
 	workers_.resize(threadNum);
@@ -16,13 +18,9 @@ ThreadPool::~ThreadPool()
 	Join();
 }
 
-// 非同期で実行したい関数と終了時のコールバック関数を追加する
+// 非同期で実行したい関数を追加する
 void ThreadPool::Add(std::function<void(void)>&& func)
 {
-	// 今テストでスレッドで処理していない
-	func();
-	return;
-
 	// ロックする
 	std::lock_guard<std::mutex> lock(mutex_);
 
@@ -33,6 +31,7 @@ void ThreadPool::Add(std::function<void(void)>&& func)
 	{
 		if (w->isTaskEnd())
 		{
+			// タスク終了しているworkerがいたらタスクをセットする
 			w->SetTask(std::move(*taskList_.begin()));
 			taskList_.pop_front();
 			return;
@@ -45,6 +44,7 @@ void ThreadPool::Join(void)
 {
 	for (auto& w : workers_)
 	{
+		// workerをjoinする
 		w->Join();
 	}
 }
@@ -55,24 +55,11 @@ void ThreadPool::Wait(void)
 {
 	for (auto& w : workers_)
 	{
+		// workerの処理を待つ
 		w->Wait();
 	}
 }
 
-// すべてのタスクを待つ
-//void ThreadPool::WaitAllTask(void)
-//{
-//	std::atomic_bool flag;
-//	flag.store(true);
-//	Add([&flag]() { flag.store(false); });
-//
-//	// 上記の処理が終わるまで待つ
-//	while (flag.load())
-//	{
-//		// このスレッドがCPUを占有しないようにする
-//		std::this_thread::yield();
-//	}
-//}
 
 void ThreadPool::WaitAllTask(void)
 {
@@ -80,42 +67,31 @@ void ThreadPool::WaitAllTask(void)
 	{
 		if (taskList_.empty())
 		{
+			// タスクリストが殻になったら抜ける
 			break;
 		}
+
+		// 他スレッドに処理の機会を与える
 		std::this_thread::yield();
 	}
+
+	// 現在の処理中のタスクを終了まで待つ
 	Wait();
 }
 
-void ThreadPool::GetTask(Worker& worker)
+bool ThreadPool::GetTask(Worker& worker)
 {
 	std::lock_guard<std::mutex> lock(mutex_);
 	if (taskList_.empty())
 	{
-		return;
+		// タスクがないとき
+		return false;
 	}
+
+	// タスクをセットする
 	worker.SetTask(std::move(*taskList_.begin()));
 	taskList_.pop_front();
+	DebugLog("ゲット");
+	return true;
 }
 
-// 実行
-//void ThreadPool::Run(void)
-//{
-//	std::function<void(void)>  func;
-//	while (runFlag_.load())
-//	{
-//		{
-//			std::unique_lock<std::mutex> lock(mutex_);
-//
-//			// リストの中身が入るまで待機
-//			cd_.wait(lock, [this]() { return taskList_.size() >= 1; });
-//
-//			// 入ったらリストから取り出す
-//			func = std::move(*taskList_.begin());
-//			taskList_.pop_front();
-//		}
-//
-//		// 実行する
-//		func();
-//	}
-//}

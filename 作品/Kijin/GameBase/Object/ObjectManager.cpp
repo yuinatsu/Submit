@@ -7,7 +7,7 @@
 #include "ObjectID.h"
 #include "../Factory/Factory.h"
 #include "../Component/Collider/Collider.h"
-#include "../Application.h"
+#include "../SceneManager.h"
 #include "../Common/Debug.h"
 
 #include "../Common/ThreadPool.h"
@@ -29,22 +29,14 @@ bool ObjectManager::IsActive(const ObjectID& id)
 
 ObjectID ObjectManager::MakeObjectID(void)
 {
-	for (int i = 0; i < 100; i++)
+	// 現在の時間をSeedとしてオブジェクトのIDを生成する
+	ObjectID id{ std::chrono::system_clock::now().time_since_epoch().count() };
+	if (!componentMap_[ComponentID::Info].contains(*id))
 	{
-		std::string seed;
-		seed.resize(maxSeed);
-		for (auto& c : seed)
-		{
-			c = Rand.GetRandom(-128, 127);
-		}
-		ObjectID id{ seed };
-		if (!componentMap_[ComponentID::Info].contains(*id))
-		{
-			return id;
-		}
+		return id;
 	}
-	//assert(false);
-	return ObjectID{};
+	assert(false);
+	return ObjectID{ std::chrono::system_clock::now().time_since_epoch().count() };
 }
 
 
@@ -65,52 +57,26 @@ void ObjectManager::RemoveAllComponent(const ObjectID& id)
 
 void ObjectManager::Begin(void)
 {
-	// 依存関係が少ない順に呼ぶ
-	auto bFunc = [this](auto& c) { c.second->Begin(*this); };
-	if (componentMap_.contains(ComponentID::Info))
+	DebugLog("behaviorの数", componentMap_[ComponentID::BehaviorBase].size());
+	for (auto& comps : componentMap_)
 	{
-		std::for_each(componentMap_[ComponentID::Info].begin(), componentMap_[ComponentID::Info].end(), bFunc);
+		for (auto& comp : comps.second)
+		{
+			comp.second->Begin(*this);
+		}
 	}
-	if (componentMap_.contains(ComponentID::Transform))
-	{
-		std::for_each(componentMap_[ComponentID::Transform].begin(), componentMap_[ComponentID::Transform].end(), bFunc);
-	}
-	if (componentMap_.contains(ComponentID::RenderBase))
-	{
-		std::for_each(componentMap_[ComponentID::RenderBase].begin(), componentMap_[ComponentID::RenderBase].end(), bFunc);
-	}
-	if (componentMap_.contains(ComponentID::Animator))
-	{
-		//std::for_each(componentMap_[ComponentID::SoundSpeaker].begin(), componentMap_[ComponentID::SoundSpeaker].end(), bFunc);
-		std::for_each(componentMap_[ComponentID::Animator].begin(), componentMap_[ComponentID::Animator].end(), bFunc);
-	}
-	if (componentMap_.contains(ComponentID::Collider))
-	{
-		std::for_each(componentMap_[ComponentID::Collider].begin(), componentMap_[ComponentID::Collider].end(), bFunc);
-	}
-	if (componentMap_.contains(ComponentID::BehaviorBase))
-	{
-		std::for_each(componentMap_[ComponentID::BehaviorBase].begin(), componentMap_[ComponentID::BehaviorBase].end(), bFunc);
-	}
+	DebugLog("behaviorの数", componentMap_[ComponentID::BehaviorBase].size());
 }
 
 void ObjectManager::Begin(ObjectID& id)
 {
-	auto func = [&id, this](auto compID) {
-		if (componentMap_.contains(compID))
+	for (auto& comps : componentMap_)
+	{
+		if (comps.second.contains(*id))
 		{
-			if (componentMap_[compID].contains(*id))
-			{
-				componentMap_[compID][*id]->Begin(*this);
-			}
+			comps.second[*id]->Begin(*this);
 		}
-	};
-	func(ComponentID::Info);
-	func(ComponentID::Transform);
-	func(ComponentID::RenderBase);
-	func(ComponentID::Animator);
-	func(ComponentID::Collider);
-	func(ComponentID::BehaviorBase);
+	}
 }
 
 void ObjectManager::End(ObjectID& id)
@@ -175,6 +141,24 @@ void ObjectManager::StartHitStop(const float stopTime)
 	hitStopTime_ = stopTime;
 }
 
+std::pair<bool, ObjectID> ObjectManager::Find(ObjectAttribute atr)
+{
+	// 指定の属性を持つオブジェクトIDを取得します
+	auto itr = std::find_if(
+		componentMap_[ComponentID::Info].begin(), 
+		componentMap_[ComponentID::Info].end(),
+		[atr](auto& pair) {
+			return static_cast<ObjectInfo&>(*pair.second).GetAttribute() == atr;
+		}
+	);
+
+	if (itr != componentMap_[ComponentID::Info].end())
+	{
+		return { true, itr->second->GetOwnerID() };
+	}
+	return { false, ObjectID{} };
+}
+
 ObjectManager::ObjectManager(size_t objectMax)
 {
 	isHitStop_ = false;
@@ -191,7 +175,13 @@ ObjectManager::ObjectManager(size_t objectMax)
 
 ObjectManager::~ObjectManager()
 {
-	auto& a = lpApp;
+	for (auto& comp : componentMap_)
+	{
+		for (auto& c : comp.second)
+		{
+			c.second->End(*this);
+		}
+	}
 }
 
 void ObjectManager::Update(float delta, Controller& controller, BaseScene& scene)
@@ -202,7 +192,7 @@ void ObjectManager::Update(float delta, Controller& controller, BaseScene& scene
 	if (isHitStop_)
 	{
 		hitStopTime_ -= delta;
-		d *= 0.5f;
+		d *= 0.1f;
 		if (hitStopTime_ <= 0.0f)
 		{
 			isHitStop_ = false;
@@ -228,7 +218,7 @@ void ObjectManager::Update(float delta, Controller& controller, BaseScene& scene
 	}
 
 	// 当たり判定の処理
-	if (!componentMap_.empty())
+	if (!componentMap_.empty() && componentMap_[ComponentID::Collider].size() > 0)
 	{
 		auto start = componentMap_[ComponentID::Collider].begin();
 		auto end = --componentMap_[ComponentID::Collider].end();
@@ -265,10 +255,12 @@ void ObjectManager::Update(float delta, Controller& controller, BaseScene& scene
 		{
 			auto itr = b;
 
-			// 無効なのでEndを呼ぶ
+			bool isFactory = static_cast<ObjectInfo&>(*itr->second).UseFactory();
+
+			// 破棄するのでEndを呼ぶ
 			End(itr->second->GetOwnerID());
 			++b;
-			if (static_cast<ObjectInfo&>(*itr->second).UseFactory())
+			if (isFactory)
 			{
 				// ファクトリーを使用して破棄処理を行う時
 				static_cast<Behavior&>(*componentMap_[ComponentID::BehaviorBase][itr->first]).Destory(*this);
@@ -287,22 +279,7 @@ void ObjectManager::Update(float delta, Controller& controller, BaseScene& scene
 	}
 }
 
-void ObjectManager::Draw(void)
-{
-	for (auto& c : componentMap_.at(ComponentID::RenderBase))
-	{
-		static_cast<Render&>(*c.second).Draw();
-	}
 
-#ifdef _DEBUG
-
-	for (auto& c : componentMap_.at(ComponentID::Collider))
-	{
-		static_cast<Collider&>(*c.second).DrawDebug();
-	}
-
-#endif
-}
 
 void ObjectManager::ShadowDraw(int shadowMap, int buff)
 {
@@ -321,10 +298,10 @@ void ObjectManager::ShadowDraw(int shadowMap, int buff)
 #endif
 }
 
-void ObjectManager::SetupShadowMap(void)
+void ObjectManager::SetupDepthTex(int ps, int buffer)
 {
 	for (auto& c : componentMap_.at(ComponentID::RenderBase))
 	{
-		static_cast<Render&>(*c.second).SetUpShadowMap();
+		static_cast<Render&>(*c.second).SetUpDepthTex(ps,buffer);
 	}
 }

@@ -236,13 +236,6 @@ bool RecthitLine(Rect rect, Math::Vector2 b1, Math::Vector2 b2, Math::Vector2 po
 	return false;
 }
 
-
-
-//Math::Vector2 operator*(const Math::Matrix& mat, const Math::Vector2& vec)
-//{
-//	return MultipleVec(mat,vec);
-//}
-
 Rect::Rect(const Math::Vector2& rr1, const Math::Vector2& rr2, const Math::Vector2& rr3, const Math::Vector2& rr4)
 {
 	r1 = rr1;

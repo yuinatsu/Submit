@@ -3,12 +3,23 @@
 #include "../ComponentHandle.h"
 #include "../Transform/Transform.h"
 #include "../Collider/CharactorCollider.h"
+#include "EnemyLaserSightBehavior.h"
+#include "../Animator/Animator.h"
 
 // 敵の動き用のクラス
 class EnemyBehavior :
 	public Behavior
 {
 public:
+
+	// 射撃用データ
+	struct ShotData
+	{
+		float shotInterval;			// 撃つまでのインターバル
+		float burstInterval;		// バースト射撃の一発当たりのインターバル
+		int burstNum;				// バースト射撃の発射数
+	};
+
 	EnemyBehavior();
 
 	void Update(BaseScene& scene, ObjectManager& objectManager, float delta, Controller& controller) final;
@@ -28,7 +39,6 @@ public:
 		speed_ = speed;
 	}
 
-	
 	float GetEnemyPower(void){return Power;}
 
 	/// <summary>
@@ -76,16 +86,48 @@ public:
 		searchDistance_ = distance;
 	}
 
-	enum class State
+	/// <summary>
+	/// チュートリアルモードにする
+	/// </summary>
+	/// <param name=""></param>
+	void Tutorial(void)
 	{
-		Search,
-		Move,
-		Stop,
-		Hit
-	};
+		isTutorial_ = true;
+	}
+
+	/// <summary>
+	/// レーザーサイトのオブジェクトIDをセットする
+	/// </summary>
+	/// <param name="id"></param>
+	void SetLaserSightID(ObjectID& id)
+	{
+		laserSightID_ = id;
+	}
+
+	/// <summary>
+	/// 射撃データをセットする
+	/// </summary>
+	/// <param name="data"></param>
+	void SetShotData(const ShotData& data)
+	{
+		shotData_ = data;
+	}
+
+	/// <summary>
+	/// レーザーサイトのオブジェクトIDを取得する
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
+	ObjectID& GetlaserSightID(void)&
+	{
+		return laserSightID_;
+	}
 
 private:
+	// 攻撃力
 	static constexpr float Power = 20.0f;
+	// 耐久値
+	static constexpr int HpMax = 3;
 
 	/// <summary>
 	/// 時間やカウンター用変数を初期化する
@@ -109,8 +151,15 @@ private:
 	/// </summary>
 	/// <param name="objectManager"> オブジェクトマネージャー </param>
 	/// <param name="delta"> デルタタイム </param>
-	void Shot(float delta, ObjectManager& objectManager);
+	void Shot(ObjectManager& objectManager,float delta);
 	
+	/// <summary>
+	/// 発射しないとき
+	/// </summary>
+	/// <param name="objectManager"></param>
+	/// <param name="delta"></param>
+	void NonShot(ObjectManager& objectManager, float delta);
+
 	/// <summary>
 	/// 追跡移動時の処理
 	/// </summary>
@@ -133,6 +182,27 @@ private:
 	void UpdateHit(ObjectManager& objectManager, float delta);
 
 	/// <summary>
+	/// 武器を入れ替える時の処理
+	/// </summary>
+	/// <param name="objectManager"></param>
+	/// <param name="delta"></param>
+	void UpdateGunToSword(ObjectManager& objectManager, float delta);
+
+	/// <summary>
+	/// 近接攻撃時の処理
+	/// </summary>
+	/// <param name="objectManager"></param>
+	/// <param name="delta"></param>
+	void UpdateAttackSword(ObjectManager& objectManager, float delta);
+
+	/// <summary>
+	/// 近接攻撃から武器を切り替える時
+	/// </summary>
+	/// <param name="objectManager"></param>
+	/// <param name="delta"></param>
+	void UpdateSwordToGun(ObjectManager& objectManager, float delta);
+
+	/// <summary>
 	/// 回転の処理
 	/// </summary>
 	/// <param name="delta"> デルタタイム </param>
@@ -144,6 +214,21 @@ private:
 	/// <param name="delta"> デルタタイム </param>
 	void Gravity(float delta);
 
+
+	/// <summary>
+	/// ヒット時の処理
+	/// </summary>
+	/// <param name="col"> 当たった相手のコライダー </param>
+	/// <param name="objectManager"> オブジェクトマネージャー </param>
+	void OnHit(Collider& col, ObjectManager& objectManager);
+
+	/// <summary>
+	/// ノックバック処理
+	/// </summary>
+	/// <param name="objectManager"></param>
+	void KnockBack(ObjectManager& objectManager);
+
+
 	// 自身のトランスフォーム
 	ComponentHandle<Transform> transform_;
 
@@ -153,27 +238,26 @@ private:
 	// 自身のコライダー
 	ComponentHandle<CharactorCollider> collider_;
 
-	/// <summary>
-	/// ヒット時の処理
-	/// </summary>
-	/// <param name="col"> 当たった相手のコライダー </param>
-	/// <param name="objectManager"> オブジェクトマネージャー </param>
-	void OnHit(Collider& col, ObjectManager& objectManager);
+	// レーザー
+	ComponentHandle<EnemyLaserSightBehavior> laserSight_;
+
+	// アニメーター
+	ComponentHandle<Animator> animetor_;
+
+	// レーザーサイトのID
+	ObjectID laserSightID_;
 
 	// 移動スピード
 	float speed_;
 
 	// ジャンプのスピード
-	float jumpTime;
+	float jumpTime_;
 
 	// 停止する距離
 	float stopDistance_;
 
 	// 探知開始する距離
 	float searchDistance_;
-
-	// 射撃用
-	float shotTime_;
 
 	// 被弾カウント
 	int damageCnt_;
@@ -184,20 +268,26 @@ private:
 	// 現在の状態に遷移してからの時間
 	float stateTime_;
 
-	// 回転開始時の角度
-	float startRot_;
+	// 回転方向(-1か1)
+	float rotSing_;
 
-	// 回転先の角度
-	float targetRot_;
-
-	// 回転するまでの時間
-	float rotTime_;
+	// 回転を行うか?
+	bool isRot_;
 
 	// 回転して振り向き終えるまでの時間
 	float turnTime_;
 
 	// 攻撃を受けた際の硬直時間
 	float hitTime_;
+
+	// 射撃に関するデータ
+	ShotData shotData_;
+
+	// 射撃時間
+	float shotTime_;
+
+	// バースト射撃回数
+	int burstCnt_;
 
 	// 更新処理
 	void (EnemyBehavior::* update_)(ObjectManager&, float);
@@ -207,5 +297,14 @@ private:
 
 	// ノックバック方向
 	Vector3 knockBackVec_;
+
+	// チュートリアル中か?
+	bool isTutorial_;
+
+	// 射撃処理
+	void (EnemyBehavior::* shot_)(ObjectManager&, float);
+
+	// 近接攻撃のオブジェクトID
+	ObjectID attackID_;
 };
 
