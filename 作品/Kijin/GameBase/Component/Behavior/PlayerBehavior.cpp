@@ -108,23 +108,30 @@ void PlayerBehavior::Update(BaseScene& scene, ObjectManager& objectManager, floa
 	CorrectionGroundPos();
 
 	// 操作制御
+	// ダッシュ
 	auto speed = ProcessDash(controller, delta);
 	collider_->SetSpeed(speed);
+	// 移動
 	auto rot = ProcessMove(scene, objectManager, controller, speed, delta);
+	// 回転
 	ProcessRotate(objectManager, scene, controller, rot);
+	// ホバリング
 	ProcessJump(controller);
 	if (float_.canFloat)
 	{
 		// 浮遊
-		//ProcessFloat();
+		ProcessFloat();
 	}
+	// 攻撃
 	ProcessAttack(controller, objectManager);
+	// スタミナ
 	ProcessStamina(controller);
 	if (isStaminaLoss_)
 	{
 		// クールタイム
 		CoolTimer(delta);
 	}
+	// スキル
 	ProcessSkill(controller, objectManager);
 	// アニメーション制御
 	Animation(controller, objectManager);
