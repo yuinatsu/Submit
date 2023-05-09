@@ -1,0 +1,1 @@
+環境変数"DXLIB_DIR"を使用してDxlib,Effekseerを使用しています。
